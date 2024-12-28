@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "Computer Modern";
+    src: local('Computer Modern'), url(../fonts/cmunrm.ttf) format('truetype');
+}
+
+body {
+    font-family: "Computer Modern", sans-serif;
+    font-size: 16px;
+}
