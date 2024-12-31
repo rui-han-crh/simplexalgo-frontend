@@ -17,7 +17,7 @@ function App() {
   return (
     <div>
       <Navbar setNavbarHeight={setNavbarHeight} />
-      <Stack paddingBottom={40} mx="auto" px={10} width={"60vw"} pt={`${navbarHeight}px`}>
+      <Stack paddingBottom={40} pt={`${navbarHeight + 8}px`} maxWidth={document.documentElement.clientHeight * 1.3} px={4} gap={2} mx="auto">
         <LinearProblemForm
           setVariables={setVariables}
           setObjectCoefficients={setObjectCoefficients}

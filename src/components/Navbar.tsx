@@ -24,14 +24,14 @@ export default function Navbar({ setNavbarHeight } : NavbarProps) {
 		<Container width={"100%"} maxW={"100%"} p={0} position={"fixed"} zIndex={1} as={"header"} ref={navBarRef}>
 			<Box 
 				bg={useColorModeValue("gray.400", "gray.700")} 
-				px={"20%"}
 				borderRadius={"5"} 
 				boxShadow={`0 8px 6px ${shadowColor}`}
+				px={4}
 			>
-				<Flex py={4} alignItems={"center"} justifyContent={"space-between"} px="10">
+				<Flex py={4} alignItems={"center"} justifyContent={"space-between"}>
 					<Flex>
 						<Text fontSize={"2xl"} fontWeight={500}>
-							Linear Optimization
+							SimplexAlgo
 						</Text>
 					</Flex>
 

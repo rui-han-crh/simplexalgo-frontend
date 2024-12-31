@@ -197,10 +197,9 @@ export default function LinearProblemForm({
 
     return (
             <form onSubmit={ handleSubmit }>
-            <Flex gap={2} direction="column" minHeight={200} minWidth="100%" padding={4} align="center">
+            <Flex gap={2} direction="column" minHeight={200} minWidth="100%" align="center">
                 <Textarea
                     minHeight="inherit"
-                    maxWidth="80vw"
                     variant={"subtle"}
                     placeholder="Enter the linear optimization problem here"
                     value={problem}
