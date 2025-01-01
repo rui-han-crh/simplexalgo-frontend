@@ -61,7 +61,7 @@ export default function Navbar({ setNavbarHeight } : NavbarProps) {
 							<Text>
 								Change Theme
 							</Text>
-							{/* Toggle Color Mode */}
+							
 							<Button onClick={toggleColorMode} size={"sm"}>
 								{colorMode === "light" ? <IoMoon /> : <LuSun />}
 							</Button>

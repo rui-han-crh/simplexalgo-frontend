@@ -12,6 +12,7 @@ import { FaHome } from "react-icons/fa";
 import { MdBackupTable } from "react-icons/md";
 import { TbCircleLetterM } from "react-icons/tb";
 import { useColorModeValue } from "@/components/ui/color-mode";
+import { Link } from 'react-router-dom';
 
 
 export default function NavDrawer({ setOpen }: { open: boolean, setOpen: (open: boolean) => void }) {
@@ -27,7 +28,7 @@ export default function NavDrawer({ setOpen }: { open: boolean, setOpen: (open: 
 
   return (
     <DrawerContent>
-      <DrawerHeader px={5} py={2}>
+      <DrawerHeader px={5} py={3}>
         <Flex alignItems={"center"}>
           <DrawerActionTrigger asChild>
             <Button size={"xs"} variant={"ghost"} px={0}>
@@ -48,13 +49,17 @@ export default function NavDrawer({ setOpen }: { open: boolean, setOpen: (open: 
           </Stack>
 
           <Stack padding={2}>
-            <Button {...drawerFlexProps} onClick={() => setOpen(false)}>
-              <MdBackupTable {...drawerButtonProps} /> Two Phase Method
-            </Button>
+            <Link to="/two-phase" onClick={() => setOpen(false)}>
+              <Button {...drawerFlexProps}>
+                <MdBackupTable {...drawerButtonProps} /> Two Phase Method
+              </Button>
+            </Link>
 
-            <Button {...drawerFlexProps} onClick={() => setOpen(false)}>
-              <TbCircleLetterM {...drawerButtonProps} /> Big M Method
-            </Button>
+            <Link to="/big-m" onClick={() => setOpen(false)}>
+              <Button {...drawerFlexProps}>
+                <TbCircleLetterM {...drawerButtonProps} /> Big-M Method
+              </Button>
+            </Link>
           </Stack>
         </Flex>
       </DrawerBody>

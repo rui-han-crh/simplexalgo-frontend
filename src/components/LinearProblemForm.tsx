@@ -3,6 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { BASE_URL } from "@/App";
 
+// Better refactor this
+
 function tokenize(problem: string) {
   const tokenRegex = /\b(min|max)\b|[+-]?\d+|[a-zA-Z]+\d*|[+-]?\d+|[+-]|>=|<=|=|\n\b/g;
   return problem.match(tokenRegex);
@@ -140,16 +142,13 @@ function parseProblem(problem: string): LinearProblem {
   }
 }
 
-export default function LinearProblemForm({
-  setVariables,
-  setObjectCoefficients,
-  setSimplexData
-}:
-  {
-    setVariables: (variables: string[]) => void,
-    setObjectCoefficients: (objective: string[]) => void,
-    setSimplexData: (data: any) => void
-  }) {
+type LinearProblemFormProps = {
+  setVariables: (variables: string[]) => void;
+  setObjectCoefficients: (objective: string[]) => void;
+  setSimplexData: (data: any) => void;
+};
+
+export default function LinearProblemForm({ setVariables, setObjectCoefficients, setSimplexData }: LinearProblemFormProps) {
   const [problem, setProblem] = useState("");
 
   const { mutate: handleSubmit, isPending } = useMutation({

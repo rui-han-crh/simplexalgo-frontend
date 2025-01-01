@@ -4,19 +4,19 @@ import { Box, Text } from '@chakra-ui/react';
 import { TableauDisplay } from '@/components/TableauDisplay';
 import { OptimalityConclusion } from '@/components/OptimalityConclusion';
 import { FeasibilityConclusion } from '@/components/FeasibilityConclusion';
-import SimplexData from '@/interfaces/simplexData';
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-export default function TwoPhasePage() {
+
+export default function BigMPage() {
   const [objectCoefficients, setObjectCoefficients] = useState<string[]>([]);
   const [initialVariables, setVariables] = useState<string[]>([]);
-  const [simplexData, setSimplexData] = useState<SimplexData>();
+  const [simplexData, setSimplexData] = useState<any>(null);
 
   return (
     <>
       <Text fontSize={"2xl"} fontWeight={"bold"}>
-        Two-Phase Method
+        Big-M Method
       </Text>
 
       <LinearProblemForm
@@ -26,15 +26,15 @@ export default function TwoPhasePage() {
       />
       {simplexData &&
           <>
-          {simplexData.PhaseOneTableaus &&
+          {simplexData.Tableaus &&
             <> 
-            <Text fontSize="xl" fontWeight="bold">Phase One</Text>
-            <TableauDisplay
-              initialVariables={initialVariables}
-              objectiveCoefficients={objectCoefficients}
-              numSlack={simplexData.NumSlack}
-              tableaus={simplexData.PhaseOneTableaus}
-            />
+              <Text fontSize="xl" fontWeight="bold">Phase One</Text>
+              <TableauDisplay
+                initialVariables={initialVariables}
+                objectiveCoefficients={objectCoefficients}
+                numSlack={simplexData.NumSlack}
+                tableaus={simplexData.PhaseOneTableaus}
+              />
             </>
           }
 
