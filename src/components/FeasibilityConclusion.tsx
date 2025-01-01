@@ -15,7 +15,7 @@ export const FeasibilityConclusion = ({ isFeasible, numArtificial, initialAndSla
   const nonZeroArtificialsIdx = phaseOneBFS?.slice(-numArtificial).map((v, i) => v !== "0" ? i : -1).filter(i => i !== -1) ?? [];
 
   return (
-    <Box fontSize={"larger"}>
+    <Box fontSize={"lg"}>
       {isFeasible
       ? <>
           <Latex>
