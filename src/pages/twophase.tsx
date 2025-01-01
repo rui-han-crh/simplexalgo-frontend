@@ -4,7 +4,7 @@ import { Box, Text } from '@chakra-ui/react';
 import { TableauDisplay } from '@/components/TableauDisplay';
 import { OptimalityConclusion } from '@/components/OptimalityConclusion';
 import { FeasibilityConclusion } from '@/components/FeasibilityConclusion';
-import { TwoPhaseSimplexData } from '@/interfaces/simplexData';
+import { TwoPhaseSimplexData } from '@/interfaces/SimplexData';
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL;
 
