@@ -1,8 +1,16 @@
 import { Box, Flex, Button, Text, Container } from "@chakra-ui/react";
 import { IoMoon } from "react-icons/io5";
 import { LuSun } from "react-icons/lu";
+import { GiHamburgerMenu } from "react-icons/gi";
 import { useColorMode, useColorModeValue } from "./ui/color-mode";
 import { useEffect, useRef } from "react";
+import {
+	DrawerBackdrop,
+	DrawerRoot,
+	DrawerTrigger,
+} from "./ui/drawer"
+import { useState } from "react";
+import NavDrawer from "./NavDrawer";
 
 type NavbarProps = {
 	setNavbarHeight: (height: number) => void;
@@ -19,33 +27,47 @@ export default function Navbar({ setNavbarHeight } : NavbarProps) {
 			console.log(navBarRef.current.offsetHeight);
 		}
 	}, [navBarRef.current]);
+
+	const [open, setOpen] = useState(false)
 	
 	return (
 		<Container width={"100%"} maxW={"100%"} p={0} position={"fixed"} zIndex={1} as={"header"} ref={navBarRef}>
-			<Box 
-				bg={useColorModeValue("gray.400", "gray.700")} 
-				borderRadius={"5"} 
-				boxShadow={`0 8px 6px ${shadowColor}`}
-				px={4}
-			>
-				<Flex py={4} alignItems={"center"} justifyContent={"space-between"}>
-					<Flex>
-						<Text fontSize={"2xl"} fontWeight={500}>
-							SimplexAlgo
-						</Text>
-					</Flex>
+				<Box 
+					bg={useColorModeValue("gray.400", "gray.700")} 
+					borderRadius={"5"} 
+					boxShadow={`0 8px 6px ${shadowColor}`}
+					px={4}
+					py={2}
+				>
+					<Flex alignItems={"center"} justifyContent={"space-between"}>
+						<Flex alignItems={"center"}>
+							<DrawerRoot open={open} onOpenChange={(e) => setOpen(e.open)} placement={"start"} size={"xs"}>
+								<DrawerBackdrop />
+									<DrawerTrigger asChild>
+										<Button size={"xs"} variant={"ghost"}>
+											<GiHamburgerMenu/>
+										</Button>
+									</DrawerTrigger>
+									
+									<NavDrawer open={open} setOpen={setOpen} />
+							</DrawerRoot>
 
-					<Flex alignItems={"center"} gap={3}>
-						<Text fontSize={"lg"} fontWeight={500}>
-							Change Theme
-						</Text>
-						{/* Toggle Color Mode */}
-						<Button onClick={toggleColorMode}>
-							{colorMode === "light" ? <IoMoon /> : <LuSun size={20} />}
-						</Button>
+							<Text padding={2} fontWeight={"bold"} fontSize={"xl"}>
+								SimplexAlgo
+							</Text>
+						</Flex>
+
+						<Flex alignItems={"center"} gap={3}>
+							<Text>
+								Change Theme
+							</Text>
+							{/* Toggle Color Mode */}
+							<Button onClick={toggleColorMode} size={"sm"}>
+								{colorMode === "light" ? <IoMoon /> : <LuSun />}
+							</Button>
+						</Flex>
 					</Flex>
-				</Flex>
-			</Box>
+				</Box>
 		</Container>
 	);
 }

@@ -5,6 +5,11 @@ import { Box, Stack, Text } from '@chakra-ui/react';
 import { TableauDisplay } from './components/TableauDisplay';
 import { OptimalityConclusion } from './components/OptimalityConclusion';
 import { FeasibilityConclusion } from './components/FeasibilityConclusion';
+import {
+  BreadcrumbCurrentLink,
+  BreadcrumbLink,
+  BreadcrumbRoot,
+} from "./components/ui/breadcrumb"
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -17,7 +22,17 @@ function App() {
   return (
     <div>
       <Navbar setNavbarHeight={setNavbarHeight} />
-      <Stack paddingBottom={40} pt={`${navbarHeight + 8}px`} maxWidth={document.documentElement.clientHeight * 1.3} px={4} gap={2} mx="auto">
+      <Stack paddingBottom={40} pt={`${navbarHeight + 10}px`} maxWidth={"120vh"} px={4} gap={2} mx="auto">
+        <BreadcrumbRoot>
+          <BreadcrumbLink href="#">Docs</BreadcrumbLink>
+          <BreadcrumbLink href="#">Components</BreadcrumbLink>
+          <BreadcrumbCurrentLink>Props</BreadcrumbCurrentLink>
+        </BreadcrumbRoot>
+        
+        <Text fontSize={"2xl"} fontWeight={"bold"}>
+          Two Phase Simplex Method
+        </Text>
+
         <LinearProblemForm
           setVariables={setVariables}
           setObjectCoefficients={setObjectCoefficients}
