@@ -2,8 +2,6 @@ import { useState } from 'react';
 import LinearProblemForm from '@/components/LinearProblemForm';
 import { Box, Text } from '@chakra-ui/react';
 import { TableauDisplay } from '@/components/TableauDisplay';
-import { OptimalityConclusion } from '@/components/OptimalityConclusion';
-import { FeasibilityConclusion } from '@/components/FeasibilityConclusion';
 import { BigMSimplexData } from '@/interfaces/simplexData';
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL;

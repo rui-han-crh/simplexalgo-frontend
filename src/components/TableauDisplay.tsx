@@ -1,4 +1,4 @@
-import { Flex, Stack } from "@chakra-ui/react";
+import { Box, Flex, Stack } from "@chakra-ui/react";
 import SimplexTableau from "@/components/SimplexTableau";
 import { TableauNavButton } from "@/components/TableauNavButton";
 import { useRef, useEffect, useState } from "react";
@@ -49,7 +49,7 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
   const [tableauIdx, setTableauIdx] = useState<number>(0);
   const tableau = tableaus[tableauIdx];
   const numColumns = tableau.ReducedCost.length;
-  const shadowColor = useColorModeValue("rgba(28, 28, 28, 0.2)", "rgba(200, 200, 200, 0.2)");  
+  const shadowColor = useColorModeValue("rgba(28, 28, 28, 0.2)", "rgba(200, 200, 200, 0.2)");
 
   return (
     <Flex 
@@ -59,6 +59,7 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
       rounded={10}
       boxShadow={`1px 1px 6px ${shadowColor}`}
       ref={flexRef}
+      maxWidth={"100%"}
     >
       <TableauNavButton
         direction="left"
@@ -67,25 +68,27 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
         disabled={tableauIdx === 0}
       />
 
-      <Stack overflowX="auto" flexDirection={"column"} justifyContent={"left"} ref={boxRef}>
-        <SimplexTableau
-          key={tableauIdx}
-          variables={generateVariables(variables, numSlack, numArtificial)}
-          basisIdx={tableau.BasicVariablesIdx}
-          cost={[
-            ...objectiveCoefficients,
-            ...Array.from({ length: numColumns - 1 - variables.length }, () => "0")
-          ]}
-          mCost={isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= variables.length + numSlack ? "1" : "0") : []}
-          reducedCost={tableau.ReducedCost}
-          mReducedCost={tableau.MReducedCost ?? []}
-          matrix={tableau.Matrix}
-          pivotRow={tableau.PivotRow}
-          pivotColumn={tableau.PivotColumn}
-          ratios={tableau.Ratios}
-          hideBasicZeros={true}
-          isOverflown={isOverflown}
-        />
+      <Stack maxWidth={`calc(100% - ${120}px)`}>
+        <Box ref={boxRef} overflowX="auto" flexDirection={"column"} justifyContent={"left"}>
+          <SimplexTableau
+            key={tableauIdx}
+            variables={generateVariables(variables, numSlack, numArtificial)}
+            basisIdx={tableau.BasicVariablesIdx}
+            cost={[
+              ...objectiveCoefficients,
+              ...Array.from({ length: numColumns - 1 - variables.length }, () => "0")
+            ]}
+            mCost={isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= variables.length + numSlack ? "1" : "0") : []}
+            reducedCost={tableau.ReducedCost}
+            mReducedCost={tableau.MReducedCost ?? []}
+            matrix={tableau.Matrix}
+            pivotRow={tableau.PivotRow}
+            pivotColumn={tableau.PivotColumn}
+            ratios={tableau.Ratios}
+            hideBasicZeros={true}
+            isOverflown={isOverflown}
+          />
+        </Box>
         <Flex boxOrient={"horizontal"} justifyContent={"center"} alignItems={"center"} my={2}>
           <PaginationRoot
             count={tableaus.length}

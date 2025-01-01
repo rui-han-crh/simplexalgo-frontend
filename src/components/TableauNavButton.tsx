@@ -10,7 +10,7 @@ type TableauNavButtonProps = {
 
 export const TableauNavButton = ({ direction, onClick, height, disabled }: TableauNavButtonProps) => {
   return (
-    <Button onClick={onClick} variant="subtle" size="md" height={height} disabled={disabled}>
+    <Button onClick={onClick} variant="subtle" size="md" height={height} disabled={disabled} maxW={60}>
       {direction === 'left' ? <BiLeftArrow /> : <BiRightArrow />}
     </Button>
   )
