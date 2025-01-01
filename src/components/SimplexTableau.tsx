@@ -1,5 +1,5 @@
 import { Table, For, Flex } from "@chakra-ui/react"
-import { useColorModeValue } from "./ui/color-mode"
+import { useColorModeValue } from "@/components/ui/color-mode";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { useEffect, useRef, useState } from "react";

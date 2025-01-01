@@ -1,9 +1,9 @@
 import { Flex, Stack } from "@chakra-ui/react";
-import SimplexTableau from "./SimplexTableau";
-import { TableauNavButton } from "./TableauNavButton";
+import SimplexTableau from "@/components/SimplexTableau";
+import { TableauNavButton } from "@/components/TableauNavButton";
 import { useRef, useEffect, useState } from "react";
-import { useColorModeValue } from "./ui/color-mode";
-import { PaginationRoot, PaginationItems } from './ui/pagination';
+import { useColorModeValue } from "@/components//ui/color-mode";
+import { PaginationRoot, PaginationItems } from '@/components/ui/pagination';
 
 type TableauDisplayProps = {
   initialVariables: string[]

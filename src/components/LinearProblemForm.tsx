@@ -1,7 +1,7 @@
 import { Button, Flex, Spinner, Textarea } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { BASE_URL } from "../App";
+import { BASE_URL } from "@/App";
 
 function tokenize(problem: string) {
   const tokenRegex = /\b(min|max)\b|[+-]?\d+|[a-zA-Z]+\d*|[+-]?\d+|[+-]|>=|<=|=|\n\b/g;

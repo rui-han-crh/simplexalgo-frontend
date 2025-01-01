@@ -2,7 +2,7 @@ import { Box, Flex, Button, Text, Container } from "@chakra-ui/react";
 import { IoMoon } from "react-icons/io5";
 import { LuSun } from "react-icons/lu";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { useColorMode, useColorModeValue } from "./ui/color-mode";
+import { useColorMode, useColorModeValue } from "@/components/ui/color-mode";
 import { useEffect, useRef } from "react";
 import {
 	DrawerBackdrop,

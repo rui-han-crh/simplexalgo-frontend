@@ -1,5 +1,5 @@
 import Latex from "react-latex-next"
-import { formatFraction, formatVariable } from "../util/format"
+import { formatFraction, formatVariable } from "@/util/format"
 import { Box } from "@chakra-ui/react"
 
 type FeasibilityConclusionProps = {

@@ -11,7 +11,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { FaHome } from "react-icons/fa";
 import { MdBackupTable } from "react-icons/md";
 import { TbCircleLetterM } from "react-icons/tb";
-import { useColorModeValue } from "./ui/color-mode";
+import { useColorModeValue } from "@/components/ui/color-mode";
 
 
 export default function NavDrawer({ setOpen }: { open: boolean, setOpen: (open: boolean) => void }) {
