@@ -4,12 +4,15 @@ import { TableauNavButton } from "@/components/TableauNavButton";
 import { useRef, useEffect, useState } from "react";
 import { useColorModeValue } from "@/components//ui/color-mode";
 import { PaginationRoot, PaginationItems } from '@/components/ui/pagination';
+import { Tableau } from "@/interfaces/Tableau";
 
 type TableauDisplayProps = {
   initialVariables: string[]
   objectiveCoefficients: string[]
   numSlack: number
-  tableaus: any[]
+  numArtificial: number
+  tableaus: Tableau[]
+  isBigM?: boolean
 };
 
 function generateVariables(variables: string[], numSlack: number, numArtificial: number): string[] {
@@ -18,7 +21,7 @@ function generateVariables(variables: string[], numSlack: number, numArtificial:
   return [...variables, ...slackVariables, ...artificialVariables];
 }
 
-export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficients, numSlack, tableaus }: TableauDisplayProps) => {
+export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficients, numSlack, numArtificial, tableaus, isBigM = false }: TableauDisplayProps) => {
   const [height, setHeight] = useState<number>(0);
   const [isOverflown, setIsOverflown] = useState<boolean>(false);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -67,13 +70,15 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
       <Stack overflowX="auto" flexDirection={"column"} justifyContent={"left"} ref={boxRef}>
         <SimplexTableau
           key={tableauIdx}
-          variables={generateVariables(variables, numSlack, numColumns - 1 - variables.length - numSlack)}
+          variables={generateVariables(variables, numSlack, numArtificial)}
           basisIdx={tableau.BasicVariablesIdx}
           cost={[
             ...objectiveCoefficients,
             ...Array.from({ length: numColumns - 1 - variables.length }, () => "0")
           ]}
+          mCost={isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= variables.length + numSlack ? "1" : "0") : []}
           reducedCost={tableau.ReducedCost}
+          mReducedCost={tableau.MReducedCost ?? []}
           matrix={tableau.Matrix}
           pivotRow={tableau.PivotRow}
           pivotColumn={tableau.PivotColumn}

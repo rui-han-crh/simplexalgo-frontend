@@ -143,12 +143,13 @@ function parseProblem(problem: string): LinearProblem {
 }
 
 type LinearProblemFormProps = {
+  postUrlEndpoint: string;
   setVariables: (variables: string[]) => void;
   setObjectCoefficients: (objective: string[]) => void;
   setSimplexData: (data: any) => void;
 };
 
-export default function LinearProblemForm({ setVariables, setObjectCoefficients, setSimplexData }: LinearProblemFormProps) {
+export default function LinearProblemForm({ postUrlEndpoint, setVariables, setObjectCoefficients, setSimplexData }: LinearProblemFormProps) {
   const [problem, setProblem] = useState("");
 
   const { mutate: handleSubmit, isPending } = useMutation({
@@ -160,7 +161,7 @@ export default function LinearProblemForm({ setVariables, setObjectCoefficients,
         const parsed = parseProblem(problem);
 
         // Make POST request to server
-        const res = await fetch(BASE_URL + '/twophase', {
+        const res = await fetch(BASE_URL + postUrlEndpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

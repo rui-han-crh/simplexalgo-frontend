@@ -1,19 +1,19 @@
-export default interface SimplexData {
+import { Tableau } from "./Tableau";
+
+export type SimplexData = {
   OptimalSolution: string[];
   OptimalCost: string;
   Degeneracy: number[];
-  FirstBFS: string[];
   NumSlack: number;
   NumArtificial: number;
+}
+
+export type TwoPhaseSimplexData = SimplexData & {
+  FirstBFS: string[];
   PhaseOneTableaus: Tableau[];
   PhaseTwoTableaus: Tableau[];
 }
 
-interface Tableau {
-  BasicVariablesIdx: number[];
-  Matrix: string[][];
-  PivotRow: number;
-  PivotColumn: number;
-  Ratios: string[];
-  ReducedCost: string[];
+export type BigMSimplexData = SimplexData & {
+  Tableaus: Tableau[];
 }

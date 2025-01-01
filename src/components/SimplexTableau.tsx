@@ -3,13 +3,15 @@ import { useColorModeValue } from "@/components/ui/color-mode";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { useEffect, useRef, useState } from "react";
-import { formatFraction, formatVariable } from "../util/format";
+import { formatFraction, formatVariable } from "@/util/format";
 
 export type SimplexTableauProps = {
   variables: string[]
   basisIdx: number[]
   cost: string[]
+  mCost: string[]
   reducedCost: string[]
+  mReducedCost: string[]
   matrix: string[][]
   pivotRow: number
   pivotColumn: number
@@ -18,7 +20,30 @@ export type SimplexTableauProps = {
   isOverflown?: boolean
 }
 
-export default function SimplexTableau({ variables, basisIdx, cost, reducedCost, matrix, pivotRow, pivotColumn, ratios, hideBasicZeros, isOverflown }: SimplexTableauProps) {
+function formatWithBigM(numFrac: string, m: string | undefined) {
+  if (m === undefined) {
+    return formatFraction(numFrac)
+  }
+
+  const numFracStr = formatFraction(numFrac)
+  if (m === "0") {
+    return numFracStr
+  }
+
+  const mFracStr = formatFraction(m)
+
+  if (mFracStr === "1") {
+    return `${numFracStr === "0" ? "" : `${numFracStr}+`}M`
+  } else if (mFracStr === "-1") {
+    return `${numFracStr === "0" ? "" : numFracStr}-M`
+  } else if (mFracStr[0] === "-") {
+    return `${numFracStr === "0" ? "" : numFracStr}${mFracStr}M`
+  } else {
+    return `${numFracStr === "0" ? "" : `${numFracStr}+`}${mFracStr}M`
+  }
+}
+
+export default function SimplexTableau({ variables, basisIdx, cost, mCost, reducedCost, mReducedCost, matrix, pivotRow, pivotColumn, ratios, hideBasicZeros, isOverflown }: SimplexTableauProps) {
   const borderColor = useColorModeValue("black", "gray.700")
 
   const borderProps = {
@@ -79,7 +104,7 @@ export default function SimplexTableau({ variables, basisIdx, cost, reducedCost,
 
               {Array.from({ length: variables.length + 1}).map((_, i) => (
                 <Table.Cell key={i} borderColor={borderColor}>
-                  { i < cost.length && <Latex>${formatFraction(cost[i])}$</Latex>}
+                  { i < cost.length && <Latex>${formatWithBigM(cost[i], mCost?.[i])}$</Latex>}
                 </Table.Cell>
               ))}
               <Table.Cell borderColor="transparent"/>
@@ -93,8 +118,10 @@ export default function SimplexTableau({ variables, basisIdx, cost, reducedCost,
               </Table.Cell>
               <For each={reducedCost}>
                 {(c, i) => (
-                  <Table.Cell borderColor={borderColor} key={i} bg={i < variables.length && c[0] === "-" ? unboundedHighlightColor : undefined}>
-                    <Latex>${formatFraction(c)}$</Latex>
+                  <Table.Cell borderColor={borderColor} whiteSpace={"nowrap"} key={i} bg={i < variables.length && c[0] === "-" ? unboundedHighlightColor : undefined}>
+                    <Latex>
+                      {`$${formatWithBigM(c, mReducedCost?.[i])}$`}
+                    </Latex>
                   </Table.Cell>
                 )}
               </For>
