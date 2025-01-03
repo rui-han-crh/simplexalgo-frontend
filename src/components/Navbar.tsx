@@ -24,7 +24,6 @@ export default function Navbar({ setNavbarHeight } : NavbarProps) {
 	useEffect(() => {
 		if (navBarRef.current) {
 			setNavbarHeight(navBarRef.current.offsetHeight);
-			console.log(navBarRef.current.offsetHeight);
 		}
 	}, [navBarRef.current]);
 

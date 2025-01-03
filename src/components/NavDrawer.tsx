@@ -43,9 +43,11 @@ export default function NavDrawer({ setOpen }: { open: boolean, setOpen: (open: 
       <DrawerBody px={2} py={0}>
         <Flex flexDir={"column"} justifyContent={"stretch"} divideStyle={"solid"} divideX={"0px"} divideY={"2px"} divideColor={useColorModeValue("gray.300", "gray.600")}>
           <Stack padding={2}>
-            <Button {...drawerFlexProps} onClick={() => setOpen(false)}>
-              <FaHome {...drawerButtonProps} /> Home
-            </Button>
+            <Link to="/" onClick={() => setOpen(false)}>
+              <Button {...drawerFlexProps}>
+                <FaHome {...drawerButtonProps} /> Home
+              </Button>
+            </Link>
           </Stack>
 
           <Stack padding={2}>

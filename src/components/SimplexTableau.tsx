@@ -43,6 +43,14 @@ function formatWithBigM(numFrac: string, m: string | undefined) {
   }
 }
 
+function isCostNegative(cost: string, mCost: string | undefined) {
+  if (mCost === undefined || mCost === "0") {
+    return cost[0] === "-"
+  }
+
+  return mCost[0] === "-"
+}
+
 export default function SimplexTableau({ variables, basisIdx, cost, mCost, reducedCost, mReducedCost, matrix, pivotRow, pivotColumn, ratios, hideBasicZeros, isOverflown }: SimplexTableauProps) {
   const borderColor = useColorModeValue("black", "gray.700")
 
@@ -66,7 +74,7 @@ export default function SimplexTableau({ variables, basisIdx, cost, mCost, reduc
   const allRatiosNull = ratios.every(r => r === null)
 
   return (
-    <Flex direction="column" paddingLeft={isOverflown ? 0 : lastColumnWidth} paddingY={10}>
+    <Flex direction="column" paddingLeft={isOverflown ? 0 : lastColumnWidth} py={10}>
       <Table.Root size="sm" showColumnBorder>
         <Table.Header>
           <Table.Row bg="transparent">
@@ -118,7 +126,7 @@ export default function SimplexTableau({ variables, basisIdx, cost, mCost, reduc
               </Table.Cell>
               <For each={reducedCost}>
                 {(c, i) => (
-                  <Table.Cell borderColor={borderColor} whiteSpace={"nowrap"} key={i} bg={i < variables.length && c[0] === "-" ? unboundedHighlightColor : undefined}>
+                  <Table.Cell borderColor={borderColor} whiteSpace={"nowrap"} key={i} bg={i < variables.length && isCostNegative(c, mReducedCost?.[i]) ? unboundedHighlightColor : undefined}>
                     <Latex>
                       {`$${formatWithBigM(c, mReducedCost?.[i])}$`}
                     </Latex>

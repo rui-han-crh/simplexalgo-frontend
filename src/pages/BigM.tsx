@@ -24,24 +24,20 @@ export default function BigMPage() {
         setObjectCoefficients={setObjectCoefficients}
         setSimplexData={setSimplexData}
       />
+      <Box mb={2} />
       {simplexData &&
           <>
           {simplexData.Tableaus &&
-            <> 
-              <Box my={2} />
-              <TableauDisplay
-                initialVariables={initialVariables}
-                objectiveCoefficients={objectCoefficients}
-                numSlack={simplexData.NumSlack}
-                numArtificial={simplexData.NumArtificial}
-                tableaus={simplexData.Tableaus}
-                isBigM={true}
-              />
-            </>
+            <TableauDisplay
+              initialVariables={initialVariables}
+              objectiveCoefficients={objectCoefficients}
+              numSlack={simplexData.NumSlack}
+              numArtificial={simplexData.NumArtificial}
+              tableaus={simplexData.Tableaus}
+              isBigM={true}
+            />
           }
-
-          <Box mb={4} />
-          </>
+        </>
       }
     </>
   );

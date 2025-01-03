@@ -69,7 +69,7 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
       />
 
       <Stack maxWidth={`calc(100% - ${120}px)`}>
-        <Box ref={boxRef} overflowX="auto" flexDirection={"column"} justifyContent={"left"}>
+        <Box ref={boxRef} overflowX="scroll" justifyContent={"center"} maxWidth={"100%"}>
           <SimplexTableau
             key={tableauIdx}
             variables={generateVariables(variables, numSlack, numArtificial)}
