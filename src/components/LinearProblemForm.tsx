@@ -6,7 +6,7 @@ import { BASE_URL } from "@/App";
 // Better refactor this
 
 function tokenize(problem: string) {
-  const tokenRegex = /\b(min|max)\b|[+-]?\d+|[a-zA-Z]+\d*|[+-]?\d+|[+-]|>=|<=|=|\n\b/g;
+  const tokenRegex = /\b(min|max)\b|[+-]?\d+\/\d+|[+-]?\d+|[a-zA-Z]+\d*|[+-]|>=|<=|=|\n\b/g;;
   return problem.match(tokenRegex);
 }
 
@@ -151,11 +151,16 @@ type LinearProblemFormProps = {
 
 export default function LinearProblemForm({ postUrlEndpoint, setVariables, setObjectCoefficients, setSimplexData }: LinearProblemFormProps) {
   const [problem, setProblem] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutate: handleSubmit, isPending } = useMutation({
     mutationKey: ['submit'],
     mutationFn: async (e: React.FormEvent) => {
       e.preventDefault();
+
+      if (isSubmitting) {
+        return;
+      }
 
       try {
         const parsed = parseProblem(problem);
@@ -169,8 +174,6 @@ export default function LinearProblemForm({ postUrlEndpoint, setVariables, setOb
           body: JSON.stringify(parsed)
         });
 
-        console.log(JSON.stringify(parsed));
-
         const data = await res.json();
 
         if (!res.ok) {
@@ -181,14 +184,15 @@ export default function LinearProblemForm({ postUrlEndpoint, setVariables, setOb
         setVariables(parsed.variables);
         setSimplexData(data);
 
-        console.log(data);
       } catch (error: any) {
         alert(error.message);
         console.error(error);
+      } finally {
+        setIsSubmitting(false);
       }
     },
     onSuccess: () => {
-      console.log("Submitted");
+      setIsSubmitting(true);
     },
     onError: (error) => {
       console.error(error);
