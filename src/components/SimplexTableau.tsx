@@ -160,7 +160,9 @@ export default function SimplexTableau({ variables, basisIdx, cost, mCost, reduc
                   <Latex>
                     {
                       allRatiosNull
-                      ? ""
+                      ? pivotRow === i
+                        ? `$(${formatVariable(variables[pivotColumn])} \\text{ entering})$`
+                        : ""
                       : ratios[i] === null 
                         ? ""
                         : pivotRow === i

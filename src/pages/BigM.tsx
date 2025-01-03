@@ -29,6 +29,7 @@ export default function BigMPage() {
           <>
           {simplexData.Tableaus &&
             <TableauDisplay
+              key={JSON.stringify(simplexData)}
               initialVariables={initialVariables}
               objectiveCoefficients={objectCoefficients}
               numSlack={simplexData.NumSlack}

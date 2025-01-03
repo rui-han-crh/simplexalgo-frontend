@@ -31,11 +31,13 @@ export default function TwoPhasePage() {
               <> 
                 <Text fontSize="xl" fontWeight="bold">Phase One</Text>
                 <TableauDisplay
+                  key={JSON.stringify(simplexData)}
                   initialVariables={initialVariables}
                   objectiveCoefficients={objectCoefficients}
                   numSlack={simplexData.NumSlack}
                   numArtificial={simplexData.NumArtificial}
                   tableaus={simplexData.PhaseOneTableaus}
+                  isPhaseOne={true}
                 />
               </>
             }
@@ -56,6 +58,7 @@ export default function TwoPhasePage() {
               <>
                 <Text fontSize="xl" fontWeight="bold">Phase Two</Text>
                 <TableauDisplay
+                  key={JSON.stringify(simplexData)}
                   initialVariables={initialVariables}
                   objectiveCoefficients={objectCoefficients}
                   numSlack={simplexData.NumSlack}
@@ -68,7 +71,8 @@ export default function TwoPhasePage() {
                   degeneracy={simplexData.Degeneracy}
                   optimalCost={simplexData.OptimalCost}
                   variables={initialVariables}
-                  lastTableauReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1].ReducedCost.slice(0, initialVariables.length)}
+                  lastTableauReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1].ReducedCosts.slice(0, initialVariables.length)}
+                  repeatedTableauIdx={simplexData.PhaseTwoRepeatedTableauIdx}
                 />
               </>
             }

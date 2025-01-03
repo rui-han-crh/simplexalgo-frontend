@@ -1,7 +1,8 @@
-import { Button, Flex, Spinner, Textarea } from "@chakra-ui/react";
+import { Button, Flex, HStack, Spinner, Textarea } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { BASE_URL } from "@/App";
+import { RadioCardItem, RadioCardLabel, RadioCardRoot } from "./ui/radio-card";
 
 // Better refactor this
 
@@ -27,16 +28,21 @@ type Constraint = {
   rhs: string;
 };
 
+type SolverOptions = {
+  useBlandsRule: boolean;
+};
+
 type LinearProblem = {
   variables: string[];
   objectiveFunction: ObjectiveFunction;
   constraints: Constraint[];
+  solverOptions: SolverOptions;
 };
 
 const keywords = ["min", "max", "minimize", "maximize"];
 
 
-function parseProblem(problem: string): LinearProblem {
+function parseProblem(problem: string, useBlandsRule: boolean): LinearProblem {
   const tokens = tokenize(problem);
 
   let lastWasRelation = false;
@@ -139,6 +145,9 @@ function parseProblem(problem: string): LinearProblem {
         rhs: rhs[i],
       };
     }),
+    solverOptions: {
+      useBlandsRule: useBlandsRule,
+    },
   }
 }
 
@@ -149,24 +158,20 @@ type LinearProblemFormProps = {
   setSimplexData: (data: any) => void;
 };
 
-export default function LinearProblemForm({ postUrlEndpoint, setVariables, setObjectCoefficients, setSimplexData }: LinearProblemFormProps) {
+export default function LinearProblemForm(props: LinearProblemFormProps) {
   const [problem, setProblem] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [useBlandsRule, setUseBlandsRule] = useState(false);
 
   const { mutate: handleSubmit, isPending } = useMutation({
     mutationKey: ['submit'],
     mutationFn: async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (isSubmitting) {
-        return;
-      }
-
       try {
-        const parsed = parseProblem(problem);
+        const parsed = parseProblem(problem, useBlandsRule);
 
         // Make POST request to server
-        const res = await fetch(BASE_URL + postUrlEndpoint, {
+        const res = await fetch(BASE_URL + props.postUrlEndpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -177,27 +182,35 @@ export default function LinearProblemForm({ postUrlEndpoint, setVariables, setOb
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || 'Something went wrong!');
+          throw new Error(data.error || 'The request could not be completed');
         }
 
-        setObjectCoefficients(parsed.objectiveFunction.coefficients);
-        setVariables(parsed.variables);
-        setSimplexData(data);
+        props.setObjectCoefficients(parsed.objectiveFunction.coefficients);
+        props.setVariables(parsed.variables);
+        props.setSimplexData(data);
 
       } catch (error: any) {
         alert(error.message);
         console.error(error);
-      } finally {
-        setIsSubmitting(false);
       }
-    },
-    onSuccess: () => {
-      setIsSubmitting(true);
     },
     onError: (error) => {
       console.error(error);
-    }
+    },
   });
+
+  const rules = [
+    { 
+      value: "dantzigs",
+      title: "Dantzig's Rule",
+      description: "Prioritizes the steepest improvements in objective function, but may result in indefinite cycling.",
+    },
+    { 
+      value: "blands",
+      title: "Bland's Rule",
+      description: "Guarantees convergence and anticycling, but may take more iterations to reach the optimal solution.",
+    }
+  ]
 
   return (
     <form onSubmit={handleSubmit}>
@@ -210,6 +223,22 @@ export default function LinearProblemForm({ postUrlEndpoint, setVariables, setOb
           onChange={(e) => setProblem(e.target.value)}
           ref={(input) => input && input.focus()}
         />
+
+        <RadioCardRoot
+          defaultValue="dantzigs"
+          onValueChange={(e) => setUseBlandsRule(e.value === "blands")} width={"100%"}
+          colorPalette={"orange"}
+        >
+          <RadioCardLabel>Pivot Rule</RadioCardLabel>
+          <HStack align="stretch">
+          {
+            rules.map((rule) => (
+              <RadioCardItem key={rule.value} label={rule.title} value={rule.value} description={rule.description} />
+            ))
+          }
+          </HStack>
+        </RadioCardRoot>
+
         <Button
           width="50%"
           type='submit'

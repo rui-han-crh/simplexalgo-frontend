@@ -8,9 +8,20 @@ type OptimalityConclusionProps = {
   optimalCost: string | null
   variables: string[]
   lastTableauReducedCosts: string[]
+  repeatedTableauIdx: number
 }
 
-export const OptimalityConclusion = ({ optimalSolution, degeneracy, optimalCost, variables, lastTableauReducedCosts }: OptimalityConclusionProps) => {
+export const OptimalityConclusion = ({ optimalSolution, degeneracy, optimalCost, variables, lastTableauReducedCosts, repeatedTableauIdx }: OptimalityConclusionProps) => {
+  if (repeatedTableauIdx !== -1) {
+    return (
+      <Box fontSize={"larger"}>
+        <Latex>
+          {`Indefinite cycling was detected as Tableau ${repeatedTableauIdx + 1} was repeated.`}
+        </Latex>
+      </Box>
+    )
+  }
+  
   const initialVariables = variables.map(formatVariable).join(", ")
   const formattedOptimalSolution = optimalSolution?.map(formatFraction).join(", ")
   const degenerateVariables = degeneracy?.map(i => formatVariable(variables[i])).join(", ")
@@ -22,7 +33,7 @@ export const OptimalityConclusion = ({ optimalSolution, degeneracy, optimalCost,
       {
         optimalCost !== null
         ? `Thus, the optimal solution is $(${initialVariables}) = (${formattedOptimalSolution})$, 
-           with cost $${formatFraction(optimalCost)}$.` 
+          with cost $${formatFraction(optimalCost)}$.` 
         : negativeReducedCostsVariables.length === 0
           ? "The problem is infeasible."
           : `The solution is unbounded as $${negativeReducedCostsVariables.join(", ")}$ may be increased indefinitely.`
@@ -33,8 +44,8 @@ export const OptimalityConclusion = ({ optimalSolution, degeneracy, optimalCost,
         {
           degeneracy && degeneracy.length > 0
           ? `The solution is degenerate as basic variable${degeneracy.length > 1 ? 's' : ''} 
-             $${degenerateVariables}$ ${degeneracy.length > 1 ? 'are' : 'is'} 0. So the basis is not unique, 
-             as any nonbasic variable may replace a basic degenerate variable.`
+            $${degenerateVariables}$ ${degeneracy.length > 1 ? 'are' : 'is'} 0. So the basis is not unique, 
+            as any nonbasic variable may replace a basic degenerate variable.`
           : ""
         }
       </Latex>

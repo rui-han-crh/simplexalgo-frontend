@@ -11,9 +11,12 @@ export type SimplexData = {
 export type TwoPhaseSimplexData = SimplexData & {
   FirstBFS: string[];
   PhaseOneTableaus: Tableau[];
+  PhaseOneRepeatedTableauIdx: number;
   PhaseTwoTableaus: Tableau[];
+  PhaseTwoRepeatedTableauIdx: number;
 }
 
 export type BigMSimplexData = SimplexData & {
   Tableaus: Tableau[];
+  RepeatedTableauIdx: number;
 }

@@ -4,6 +4,6 @@ export type Tableau = {
   PivotRow: number;
   PivotColumn: number;
   Ratios: string[];
-  ReducedCost: string[];
-  MReducedCost?: string[];
+  ReducedCosts: string[];
+  MReducedCosts?: string[];
 }

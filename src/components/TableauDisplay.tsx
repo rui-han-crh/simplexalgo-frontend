@@ -11,7 +11,8 @@ type TableauDisplayProps = {
   objectiveCoefficients: string[]
   numSlack: number
   numArtificial: number
-  tableaus: Tableau[]
+  tableaus: Tableau[],
+  isPhaseOne?: boolean
   isBigM?: boolean
 };
 
@@ -21,7 +22,7 @@ function generateVariables(variables: string[], numSlack: number, numArtificial:
   return [...variables, ...slackVariables, ...artificialVariables];
 }
 
-export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficients, numSlack, numArtificial, tableaus, isBigM = false }: TableauDisplayProps) => {
+export const TableauDisplay = (props: TableauDisplayProps) => {
   const [height, setHeight] = useState<number>(0);
   const [isOverflown, setIsOverflown] = useState<boolean>(false);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -47,12 +48,12 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
   }, [boxRef.current]);
 
   const [tableauIdx, setTableauIdx] = useState<number>(0);
-  const tableau = tableaus[tableauIdx];
-  const numColumns = tableau.ReducedCost.length;
+  const tableau = props.tableaus[Math.max(0, Math.min(tableauIdx, props.tableaus.length - 1))];
+  const numColumns = tableau.ReducedCosts.length;
   const shadowColor = useColorModeValue("rgba(28, 28, 28, 0.2)", "rgba(200, 200, 200, 0.2)");
 
   return (
-    <Flex 
+    <Flex
       align="center"
       justify="space-between"
       bg="bg.muted"
@@ -72,15 +73,18 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
         <Box ref={boxRef} overflowX="scroll" justifyContent={"center"} maxWidth={"100%"}>
           <SimplexTableau
             key={tableauIdx}
-            variables={generateVariables(variables, numSlack, numArtificial)}
+            variables={generateVariables(props.initialVariables, props.numSlack, props.numArtificial)}
             basisIdx={tableau.BasicVariablesIdx}
-            cost={[
-              ...objectiveCoefficients,
-              ...Array.from({ length: numColumns - 1 - variables.length }, () => "0")
-            ]}
-            mCost={isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= variables.length + numSlack ? "1" : "0") : []}
-            reducedCost={tableau.ReducedCost}
-            mReducedCost={tableau.MReducedCost ?? []}
+            cost={props.isPhaseOne 
+              ? Array(numColumns - 1).fill("0")
+              : [
+                ...props.objectiveCoefficients,
+                ...Array.from({ length: numColumns - 1 - props.initialVariables.length }, () => "0")
+              ]
+            }
+            mCost={props.isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= props.initialVariables.length + props.numSlack ? "1" : "0") : []}
+            reducedCost= {tableau.ReducedCosts}
+            mReducedCost={tableau.MReducedCosts ?? []}
             matrix={tableau.Matrix}
             pivotRow={tableau.PivotRow}
             pivotColumn={tableau.PivotColumn}
@@ -91,9 +95,10 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
         </Box>
         <Flex boxOrient={"horizontal"} justifyContent={"center"} alignItems={"center"} my={2}>
           <PaginationRoot
-            count={tableaus.length}
+            count={props.tableaus.length}
             pageSize={1}
             page={tableauIdx + 1}
+            defaultPage={1}
             onPageChange={(page) => setTableauIdx(page.page - 1)}
           >
             <PaginationItems/>
@@ -103,9 +108,9 @@ export const TableauDisplay = ({ initialVariables: variables, objectiveCoefficie
 
       <TableauNavButton
         direction="right"
-        onClick={() => { if (tableauIdx < tableaus.length - 1) setTableauIdx(tableauIdx + 1); }}
+        onClick={() => { if (tableauIdx < props.tableaus.length - 1) setTableauIdx(tableauIdx + 1); }}
         height={height}
-        disabled={tableauIdx === tableaus.length - 1}
+        disabled={tableauIdx === props.tableaus.length - 1}
       />
     </Flex>
   );
