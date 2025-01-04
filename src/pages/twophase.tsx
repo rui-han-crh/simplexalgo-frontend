@@ -2,9 +2,8 @@ import { useState } from 'react';
 import LinearProblemForm from '@/components/LinearProblemForm';
 import { Box, Text } from '@chakra-ui/react';
 import { TableauDisplay } from '@/components/TableauDisplay';
-import { OptimalityConclusion } from '@/components/OptimalityConclusion';
-import { FeasibilityConclusion } from '@/components/FeasibilityConclusion';
 import { TwoPhaseSimplexData } from '@/interfaces/SimplexData';
+import { Conclusion } from '@/components/Conclusion';
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -42,14 +41,15 @@ export default function TwoPhasePage() {
               </>
             }
 
-            <FeasibilityConclusion
+            <Conclusion
+              showFeasibility={true}
+              showOptimality={false}
               isFeasible={simplexData.PhaseTwoTableaus !== null}
-              initialAndSlackVariables={[
-                ...initialVariables,
-                ...Array.from({ length: simplexData.NumSlack }, (_, i) => `s${i + 1}`)
-              ]}
+              initialVariables={initialVariables}
+              numSlack={simplexData.NumSlack}
               numArtificial={simplexData.NumArtificial}
-              phaseOneBFS={simplexData.FirstBFS}
+              basicSolution={simplexData.BasicSolution}
+              repeatedTableauIdx={simplexData.PhaseOneRepeatedTableauIdx}
             />
 
             <Box mb={4} />
@@ -66,12 +66,16 @@ export default function TwoPhasePage() {
                   tableaus={simplexData.PhaseTwoTableaus}
                 />
 
-                <OptimalityConclusion
+                <Conclusion
+                  showFeasibility={false}
+                  showOptimality={true}
+                  initialVariables={initialVariables}
+                  numSlack={simplexData.NumSlack}
+                  numArtificial={0}
                   optimalSolution={simplexData.OptimalSolution}
-                  degeneracy={simplexData.Degeneracy}
                   optimalCost={simplexData.OptimalCost}
-                  variables={initialVariables}
-                  lastTableauReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1].ReducedCosts.slice(0, initialVariables.length)}
+                  degenerateVariablesIdx={simplexData.DegenerateVariablesIdx}
+                  lastTableauReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1]?.ReducedCosts?.slice(0, initialVariables.length)}
                   repeatedTableauIdx={simplexData.PhaseTwoRepeatedTableauIdx}
                 />
               </>

@@ -3,13 +3,13 @@ import { Tableau } from "./Tableau";
 export type SimplexData = {
   OptimalSolution: string[];
   OptimalCost: string;
-  Degeneracy: number[];
+  DegenerateVariablesIdx: number[];
   NumSlack: number;
   NumArtificial: number;
+  BasicSolution: string[];
 }
 
 export type TwoPhaseSimplexData = SimplexData & {
-  FirstBFS: string[];
   PhaseOneTableaus: Tableau[];
   PhaseOneRepeatedTableauIdx: number;
   PhaseTwoTableaus: Tableau[];
@@ -19,4 +19,5 @@ export type TwoPhaseSimplexData = SimplexData & {
 export type BigMSimplexData = SimplexData & {
   Tableaus: Tableau[];
   RepeatedTableauIdx: number;
+  IsFeasible: boolean;
 }

@@ -11,6 +11,10 @@ export function formatFraction(n: string): string {
   }
 }
   
-export function formatVariable(v: string): string {
+export function formatVariable(v: string | undefined): string {
+  if (v === undefined) {
+      return ""
+  }
+  
   return v.split(/(\d+)/).map((s, i) => i % 2 === 0 ? s : `_${s}`).join('')
 }

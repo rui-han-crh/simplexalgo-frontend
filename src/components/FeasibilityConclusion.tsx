@@ -4,36 +4,46 @@ import { Box } from "@chakra-ui/react"
 
 type FeasibilityConclusionProps = {
   isFeasible: boolean
+  initialVariables: string[]
+  numSlack: number
   numArtificial: number
-  initialAndSlackVariables: string[]
-  phaseOneBFS: string[] | null
+  basicSolution: string[] | null
 }
 
-export const FeasibilityConclusion = ({ isFeasible, numArtificial, initialAndSlackVariables, phaseOneBFS }: FeasibilityConclusionProps) => {
-  const artificialVariables = Array.from({ length: numArtificial }, (_, i) => `y_${i + 1}`).join(" + ");
-  const filteredSolution = phaseOneBFS?.slice(0, initialAndSlackVariables.length).map(formatFraction).join(", ");
-  const nonZeroArtificialsIdx = phaseOneBFS?.slice(-numArtificial).map((v, i) => v !== "0" ? i : -1).filter(i => i !== -1) ?? [];
+export const FeasibilityConclusion = ({ isFeasible, initialVariables, numArtificial, numSlack, basicSolution }: FeasibilityConclusionProps) => {
+  const initialAndSlackVariablesTuple = [
+    ...initialVariables,
+    ...Array.from({ length: numSlack }, (_, i) => `s${i + 1}`)
+  ].map(formatVariable).join(", ");
+  const numInitial = initialVariables.length;
+  const bfsInitialAndSlack = basicSolution?.slice(0, numInitial + numSlack).map(formatFraction).join(", ");
 
-  return (
-    <Box fontSize={"lg"}>
-      {isFeasible
-      ? <>
-          <Latex>
-            {artificialVariables.length > 0
-              ? `At the optimum, $${artificialVariables} = 0$.`
+  if (isFeasible) {
+    const artificialVariablesSymbols = Array.from({ length: numArtificial }, (_, i) => `y_${i + 1}`);
+    const artificialVariablesSummation = artificialVariablesSymbols.join(" + ");
+    return (
+      <Box fontSize="lg">
+        <Latex>
+            {artificialVariablesSummation.length > 0
+              ? `At the optimum, $${artificialVariablesSummation} = 0$.`
               : `There are no artificial variables.`
             }
           </Latex>
-          <p></p>
-          <Latex>{`So the original problem has a BFS $(${initialAndSlackVariables.map(formatVariable).join(", ")}) = (${filteredSolution})$.`}</Latex>
-        </>
-      : <Latex>
-          {`Artificial variable${nonZeroArtificialsIdx.length > 1 ? 's' : ''} 
-          $${nonZeroArtificialsIdx.map(i => `y_${i + 1}`).join(", ")}$
-          ${nonZeroArtificialsIdx.length > 1 ? 'are' : 'is'} non-zero in the final BFS.
-          So the original problem is infeasible.`}
+          <br/>
+          <Latex>{`So the original problem has a BFS $(${initialAndSlackVariablesTuple}) = (${bfsInitialAndSlack})$.`}</Latex>
+      </Box>
+    )
+  } else {
+    const nonZeroArtificialsIdx = basicSolution?.slice(-numArtificial).map((v, i) => v !== "0" ? i : -1).filter(i => i !== -1) ?? [];
+    const nonZeroArtificialVariables = nonZeroArtificialsIdx.map(i => `y_${i + 1}`);
+
+    return (
+      <Box fontSize="lg">
+        <Latex>
+          {`The problem is infeasible as artificial variable${nonZeroArtificialVariables?.length > 1 ? 's' : ''} $${nonZeroArtificialVariables.join(", ")}$
+          ${nonZeroArtificialVariables.length > 1 ? 'are' : 'is'} non-zero in the final BFS.`}
         </Latex>
-      }
-    </Box>
-  );
+      </Box>
+    )
+  }
 }

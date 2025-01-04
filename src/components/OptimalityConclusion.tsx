@@ -3,36 +3,27 @@ import { formatFraction, formatVariable } from "@/util/format"
 import { Box } from "@chakra-ui/react"
 
 type OptimalityConclusionProps = {
+  initialVariables: string[]
+  numSlack: number
   optimalSolution: string[]
-  degeneracy: number[] | null
+  degenerateVariablesIdx: number[] | null
   optimalCost: string | null
-  variables: string[]
   lastTableauReducedCosts: string[]
-  repeatedTableauIdx: number
 }
 
-export const OptimalityConclusion = ({ optimalSolution, degeneracy, optimalCost, variables, lastTableauReducedCosts, repeatedTableauIdx }: OptimalityConclusionProps) => {
-  if (repeatedTableauIdx !== -1) {
-    return (
-      <Box fontSize={"larger"}>
-        <Latex>
-          {`Indefinite cycling was detected as Tableau ${repeatedTableauIdx + 1} was repeated.`}
-        </Latex>
-      </Box>
-    )
-  }
-  
-  const initialVariables = variables.map(formatVariable).join(", ")
+export const OptimalityConclusion = ({ initialVariables, numSlack, optimalSolution, degenerateVariablesIdx, optimalCost, lastTableauReducedCosts }: OptimalityConclusionProps) => {
+  const initialVariablesTuple = initialVariables.map(formatVariable).join(", ")
   const formattedOptimalSolution = optimalSolution?.map(formatFraction).join(", ")
-  const degenerateVariables = degeneracy?.map(i => formatVariable(variables[i])).join(", ")
-  const negativeReducedCostsVariables = lastTableauReducedCosts.map((v, i) => v[0] === "-" ? formatVariable(variables[i]) : "").filter(v => v !== "")
+  const degenerateVariables = degenerateVariablesIdx?.map(i => formatVariable(initialVariables[i])).join(", ")
+  const lastInitialAndSlackReducedCosts = lastTableauReducedCosts.slice(0, initialVariables.length + numSlack)
+  const negativeReducedCostsVariables = lastInitialAndSlackReducedCosts.map((v, i) => v[0] === "-" ? formatVariable(initialVariables[i]) : "").filter(v => v !== "")
 
   return (
-    <Box fontSize={"larger"}>
+    <Box fontSize={"lg"}>
       <Latex>
       {
         optimalCost !== null
-        ? `Thus, the optimal solution is $(${initialVariables}) = (${formattedOptimalSolution})$, 
+        ? `Thus, the optimal solution is $(${initialVariablesTuple}) = (${formattedOptimalSolution})$, 
           with cost $${formatFraction(optimalCost)}$.` 
         : negativeReducedCostsVariables.length === 0
           ? "The problem is infeasible."
@@ -42,9 +33,9 @@ export const OptimalityConclusion = ({ optimalSolution, degeneracy, optimalCost,
       <p></p>
       <Latex>
         {
-          degeneracy && degeneracy.length > 0
-          ? `The solution is degenerate as basic variable${degeneracy.length > 1 ? 's' : ''} 
-            $${degenerateVariables}$ ${degeneracy.length > 1 ? 'are' : 'is'} 0. So the basis is not unique, 
+          degenerateVariablesIdx && degenerateVariablesIdx.length > 0
+          ? `The solution is degenerate as basic variable${degenerateVariablesIdx.length > 1 ? 's' : ''} 
+            $${degenerateVariables}$ ${degenerateVariablesIdx.length > 1 ? 'are' : 'is'} 0. So the basis is not unique, 
             as any nonbasic variable may replace a basic degenerate variable.`
           : ""
         }
