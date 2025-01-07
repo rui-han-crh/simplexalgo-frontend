@@ -30,7 +30,7 @@ export const FeasibilityConclusion = ({ isFeasible, initialVariables, numArtific
             }
           </Latex>
           <br/>
-          <Latex>{`So the original problem has a BFS $(${initialAndSlackVariablesTuple}) = (${bfsInitialAndSlack})$.`}</Latex>
+          <Latex>{`So the linear problem has a BFS $(${initialAndSlackVariablesTuple}) = (${bfsInitialAndSlack})$.`}</Latex>
       </Box>
     )
   } else {

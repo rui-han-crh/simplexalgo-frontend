@@ -16,14 +16,15 @@ import { Link } from 'react-router-dom';
 
 
 export default function NavDrawer({ setOpen }: { open: boolean, setOpen: (open: boolean) => void }) {
-  const drawerFlexProps: { variant: "ghost"; justifyContent: string; fontSize: string; } = {
+  const drawerFlexProps: { variant: "ghost"; justifyContent: string; fontSize: string; width: string } = {
     variant: "ghost",
     justifyContent: "flex-start",
-    fontSize: "lg"
+    fontSize: "lg",
+    width: "100%"
   };
 
   const drawerButtonProps: { style: { marginRight: string; }; } = {
-    style: { marginRight: "30px" },
+    style: { marginRight: "20px" },
   };
 
   return (

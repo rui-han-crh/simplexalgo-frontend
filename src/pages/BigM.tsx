@@ -29,7 +29,6 @@ export default function BigMPage() {
       {simplexData && simplexData.Tableaus &&
         <>
           <TableauDisplay
-            key={JSON.stringify(simplexData)}
             initialVariables={initialVariables}
             objectiveCoefficients={objectCoefficients}
             numSlack={simplexData.NumSlack}
@@ -44,7 +43,7 @@ export default function BigMPage() {
             numSlack={simplexData.NumSlack}
             numArtificial={simplexData.NumArtificial}
             basicSolution={simplexData.BasicSolution}
-            optimalSolution={simplexData.OptimalSolution}
+            optimalSolutions={removeDuplicateSolutions(simplexData.OptimalSolutions)}
             optimalCost={simplexData.OptimalCost}
             degenerateVariablesIdx={simplexData.DegenerateVariablesIdx}
             lastTableauReducedCosts={simplexData.Tableaus[simplexData.Tableaus.length - 1].ReducedCosts}
@@ -54,4 +53,12 @@ export default function BigMPage() {
       }
     </>
   );
+}
+
+function removeDuplicateSolutions(optimalSolutions: {[key: number]: string}[]) {
+  const seen = new Set();
+  return optimalSolutions.filter(sol => {
+    const key = JSON.stringify(Object.entries(sol).filter(([_, val]) => val !== "0"));
+    return seen.has(key) ? false : seen.add(key);
+  });
 }

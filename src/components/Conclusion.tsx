@@ -11,9 +11,9 @@ export type ConclusionProps = {
   numArtificial: number;
   isFeasible?: boolean;
   basicSolution?: string[] | null;
-  optimalSolution?: string[];
+  optimalSolutions?: { [key: number]: string }[];
   optimalCost?: string | null;
-  degenerateVariablesIdx?: number[] | null;
+  degenerateVariablesIdx?: number[];
   lastTableauReducedCosts?: string[];
   repeatedTableauIdx?: number;
 }
@@ -26,9 +26,9 @@ export const Conclusion = ({
   numArtificial,
   isFeasible = true,
   basicSolution = null,
-  optimalSolution = [],
+  optimalSolutions = [],
   optimalCost = null,
-  degenerateVariablesIdx = null,
+  degenerateVariablesIdx = [],
   lastTableauReducedCosts = [],
   repeatedTableauIdx = -1
 }: ConclusionProps) => {
@@ -43,7 +43,7 @@ export const Conclusion = ({
   }
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} key={JSON.stringify({ isFeasible, optimalSolutions })}>
       { showFeasibility && 
         FeasibilityConclusion({
           isFeasible: isFeasible,
@@ -57,7 +57,7 @@ export const Conclusion = ({
         OptimalityConclusion({
           initialVariables: initialVariables,
           numSlack: numSlack,
-          optimalSolution: optimalSolution,
+          optimalSolutions: optimalSolutions,
           degenerateVariablesIdx: degenerateVariablesIdx,
           optimalCost: optimalCost,
           lastTableauReducedCosts: lastTableauReducedCosts,

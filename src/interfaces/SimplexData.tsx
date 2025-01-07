@@ -1,7 +1,7 @@
 import { Tableau } from "./Tableau";
 
 export type SimplexData = {
-  OptimalSolution: string[];
+  OptimalSolutions: {[key: number]: string}[];
   OptimalCost: string;
   DegenerateVariablesIdx: number[];
   NumSlack: number;

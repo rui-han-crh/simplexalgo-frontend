@@ -1,10 +1,17 @@
-import { Box, Flex, Stack } from "@chakra-ui/react";
+import { Box, Button, createListCollection, Flex, Stack } from "@chakra-ui/react";
 import SimplexTableau from "@/components/SimplexTableau";
 import { TableauNavButton } from "@/components/TableauNavButton";
 import { useRef, useEffect, useState } from "react";
 import { useColorModeValue } from "@/components//ui/color-mode";
 import { PaginationRoot, PaginationItems } from '@/components/ui/pagination';
 import { Tableau } from "@/interfaces/Tableau";
+import { MdOutlineNextPlan } from "react-icons/md";
+import {
+  MenuContent,
+  MenuItem,
+  MenuRoot,
+  MenuTrigger,
+} from "@/components/ui/menu"
 
 type TableauDisplayProps = {
   initialVariables: string[]
@@ -51,6 +58,15 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
   const tableau = props.tableaus[Math.max(0, Math.min(tableauIdx, props.tableaus.length - 1))];
   const numColumns = tableau.ReducedCosts.length;
   const shadowColor = useColorModeValue("rgba(28, 28, 28, 0.2)", "rgba(200, 200, 200, 0.2)");
+
+  const frameworks = createListCollection({
+    items: [
+      { label: "Optima 1", value: "1" },
+      { label: "Optima 2", value: "2" },
+      { label: "Optima 3", value: "3" },
+      { label: "Optima 4", value: "4" },
+    ],
+  })
 
   return (
     <Flex
@@ -103,6 +119,20 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
           >
             <PaginationItems/>
           </PaginationRoot>
+          <MenuRoot onSelect={(value) => console.log(value)}>
+            <MenuTrigger>
+                <Button variant="subtle" size="md" margin={0} padding={0}>
+                  <MdOutlineNextPlan />
+                </Button>
+            </MenuTrigger>
+            <MenuContent>
+              {frameworks.items.map((thing) => (
+                <MenuItem value={thing.value} key={thing.value}>
+                  {thing.label}
+                </MenuItem>
+              ))}
+            </MenuContent>
+          </MenuRoot>
         </Flex>
       </Stack>
 

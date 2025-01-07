@@ -72,7 +72,7 @@ export default function TwoPhasePage() {
                   initialVariables={initialVariables}
                   numSlack={simplexData.NumSlack}
                   numArtificial={0}
-                  optimalSolution={simplexData.OptimalSolution}
+                  optimalSolutions={simplexData.OptimalSolutions}
                   optimalCost={simplexData.OptimalCost}
                   degenerateVariablesIdx={simplexData.DegenerateVariablesIdx}
                   lastTableauReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1]?.ReducedCosts?.slice(0, initialVariables.length)}
