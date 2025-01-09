@@ -35,7 +35,7 @@ export default function TwoPhasePage() {
                   objectiveCoefficients={objectCoefficients}
                   numSlack={simplexData.NumSlack}
                   numArtificial={simplexData.NumArtificial}
-                  tableaus={simplexData.PhaseOneTableaus}
+                  nonOptimalTableaus={simplexData.PhaseOneTableaus}
                   isPhaseOne={true}
                 />
               </>
@@ -63,7 +63,7 @@ export default function TwoPhasePage() {
                   objectiveCoefficients={objectCoefficients}
                   numSlack={simplexData.NumSlack}
                   numArtificial={0}
-                  tableaus={simplexData.PhaseTwoTableaus}
+                  nonOptimalTableaus={simplexData.PhaseTwoTableaus}
                 />
 
                 <Conclusion
@@ -75,7 +75,7 @@ export default function TwoPhasePage() {
                   optimalSolutions={simplexData.OptimalSolutions}
                   optimalCost={simplexData.OptimalCost}
                   degenerateVariablesIdx={simplexData.DegenerateVariablesIdx}
-                  lastTableauReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1]?.ReducedCosts?.slice(0, initialVariables.length)}
+                  finalReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1]?.ReducedCosts?.slice(0, initialVariables.length)}
                   repeatedTableauIdx={simplexData.PhaseTwoRepeatedTableauIdx}
                 />
               </>

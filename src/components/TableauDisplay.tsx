@@ -13,12 +13,19 @@ import {
   MenuTrigger,
 } from "@/components/ui/menu"
 
+type Swap = {
+  enteringVariable: string
+  leavingVariable: string
+  solutionIdx: number
+}
+
 type TableauDisplayProps = {
   initialVariables: string[]
   objectiveCoefficients: string[]
   numSlack: number
   numArtificial: number
-  tableaus: Tableau[],
+  nonOptimalTableaus: Tableau[],
+  optimalTableaus: Tableau[],
   isPhaseOne?: boolean
   isBigM?: boolean
 };
@@ -29,11 +36,64 @@ function generateVariables(variables: string[], numSlack: number, numArtificial:
   return [...variables, ...slackVariables, ...artificialVariables];
 }
 
+function indexToVar(index : number, numInitialVariables: number): string {
+  return index < numInitialVariables ? `x${index + 1}` : `s${index - numInitialVariables + 1}`;
+}
+
+function findBasisDifference (currentTableau: Tableau, alternativeOptimaTableaus: Tableau[], numInitialVariables: number): Swap[] {
+  const currentBasisIndices = currentTableau.BasicVariablesIdx;
+  const otherBasisIndices = alternativeOptimaTableaus.map(t => t.BasicVariablesIdx);
+
+  const setCurrent = new Set(currentBasisIndices);
+  const result : Swap[] = [];
+  for (let i = 0; i < otherBasisIndices.length; i++) {
+    const basisIndices = otherBasisIndices[i];
+    const setOther = new Set(basisIndices);
+    const diffCurrent = currentBasisIndices.filter(x => !setOther.has(x));
+    const diffOther = basisIndices.filter(x => !setCurrent.has(x));
+
+    const diff = [...diffCurrent, ...diffOther];
+
+    if (diff.length === 2) {
+      result.push({
+        enteringVariable: indexToVar(diff[1], numInitialVariables),
+        leavingVariable: indexToVar(diff[0], numInitialVariables),
+        solutionIdx: i
+      });
+    }
+  }
+
+  return result;
+}
+
+function findRearrangement (prevBasisIndices: number[], currentBasisIndices: number[]): number[] {
+  const rearrangement = new Array(currentBasisIndices.length).fill(-1);
+
+  let outstandingIdx = -1;
+  const notTaken = new Set(Array.from({ length: prevBasisIndices.length }, (_, i) => i));
+  
+  for (let i = 0; i < currentBasisIndices.length; i++) {
+    const idx = prevBasisIndices.indexOf(currentBasisIndices[i]);
+    if (idx !== -1) {
+      rearrangement[i] = idx;
+      notTaken.delete(idx);
+    } else {
+      outstandingIdx = i;
+    }
+  }
+
+  rearrangement[outstandingIdx] = notTaken.values().next().value;
+  return rearrangement;
+}
+
 export const TableauDisplay = (props: TableauDisplayProps) => {
   const [height, setHeight] = useState<number>(0);
   const [isOverflown, setIsOverflown] = useState<boolean>(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const flexRef = useRef<HTMLDivElement>(null);
+
+  const tableauList = useRef<Tableau[]>([...props.nonOptimalTableaus, props.optimalTableaus[0]]);
+  const lastBasisIndices = useRef<number[]>(props.optimalTableaus[0].BasicVariablesIdx);
 
   useEffect(() => {
     if (flexRef.current) {
@@ -55,18 +115,24 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
   }, [boxRef.current]);
 
   const [tableauIdx, setTableauIdx] = useState<number>(0);
-  const tableau = props.tableaus[Math.max(0, Math.min(tableauIdx, props.tableaus.length - 1))];
-  const numColumns = tableau.ReducedCosts.length;
+  const tableauPrev = tableauList.current[Math.max(0, Math.min(tableauIdx - 1, tableauList.current.length - 1))];
+  const tableauCurrent = tableauList.current[Math.max(0, Math.min(tableauIdx, tableauList.current.length - 1))];
+  const tableauNext = tableauList.current[Math.max(0, Math.min(tableauIdx + 1, tableauList.current.length - 1))];
+
+  const rearrangement = findRearrangement(tableauPrev.BasicVariablesIdx, tableauCurrent.BasicVariablesIdx)
+
+  tableauCurrent.Matrix = rearrangement.map(i => tableauCurrent.Matrix[i])
+  tableauCurrent.BasicVariablesIdx = rearrangement.map(i => tableauCurrent.BasicVariablesIdx[i])
+
+  const [pivotRow, pivotColumn] = findPivotRowAndColumn(tableauCurrent.BasicVariablesIdx, tableauNext.BasicVariablesIdx);
+
+  const numColumns = tableauCurrent.Matrix[0].length;
   const shadowColor = useColorModeValue("rgba(28, 28, 28, 0.2)", "rgba(200, 200, 200, 0.2)");
 
-  const frameworks = createListCollection({
-    items: [
-      { label: "Optima 1", value: "1" },
-      { label: "Optima 2", value: "2" },
-      { label: "Optima 3", value: "3" },
-      { label: "Optima 4", value: "4" },
-    ],
-  })
+  const tableauLast = tableauList.current[tableauList.current.length - 1];
+  const swaps = createListCollection({
+    items: findBasisDifference(tableauLast, props.optimalTableaus, props.initialVariables.length),
+  });
 
   return (
     <Flex
@@ -90,7 +156,7 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
           <SimplexTableau
             key={tableauIdx}
             variables={generateVariables(props.initialVariables, props.numSlack, props.numArtificial)}
-            basisIdx={tableau.BasicVariablesIdx}
+            basisIdx={tableauCurrent.BasicVariablesIdx}
             cost={props.isPhaseOne 
               ? Array(numColumns - 1).fill("0")
               : [
@@ -99,19 +165,19 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
               ]
             }
             mCost={props.isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= props.initialVariables.length + props.numSlack ? "1" : "0") : []}
-            reducedCost= {tableau.ReducedCosts}
-            mReducedCost={tableau.MReducedCosts ?? []}
-            matrix={tableau.Matrix}
-            pivotRow={tableau.PivotRow}
-            pivotColumn={tableau.PivotColumn}
-            ratios={tableau.Ratios}
+            reducedCost= {tableauCurrent.ReducedCosts ?? props.optimalTableaus[0].ReducedCosts ?? []}
+            mReducedCost={tableauCurrent.MReducedCosts ?? props.optimalTableaus[0].MReducedCosts ?? []}
+            matrix={tableauCurrent.Matrix}
+            pivotRow={pivotRow}
+            pivotColumn={pivotColumn}
+            ratios={tableauCurrent.Ratios ?? []}
             hideBasicZeros={true}
             isOverflown={isOverflown}
           />
         </Box>
         <Flex boxOrient={"horizontal"} justifyContent={"center"} alignItems={"center"} my={2}>
           <PaginationRoot
-            count={props.tableaus.length}
+            count={tableauList.current.length}
             pageSize={1}
             page={tableauIdx + 1}
             defaultPage={1}
@@ -119,16 +185,16 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
           >
             <PaginationItems/>
           </PaginationRoot>
-          <MenuRoot onSelect={(value) => console.log(value)}>
+          <MenuRoot onSelect={(details) => { tableauList.current.push(props.optimalTableaus[parseInt(details.value)]); setTableauIdx(tableauIdx + 1); }}>
             <MenuTrigger>
                 <Button variant="subtle" size="md" margin={0} padding={0}>
                   <MdOutlineNextPlan />
                 </Button>
             </MenuTrigger>
             <MenuContent>
-              {frameworks.items.map((thing) => (
-                <MenuItem value={thing.value} key={thing.value}>
-                  {thing.label}
+              {swaps.items.map(swap => (
+                <MenuItem key={swap.solutionIdx} value={swap.solutionIdx.toString()}>
+                  {`${swap.leavingVariable} leaves, ${swap.enteringVariable} enters`}
                 </MenuItem>
               ))}
             </MenuContent>
@@ -138,12 +204,24 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
 
       <TableauNavButton
         direction="right"
-        onClick={() => { if (tableauIdx < props.tableaus.length - 1) setTableauIdx(tableauIdx + 1); }}
+        onClick={() => { if (tableauIdx < props.nonOptimalTableaus.length - 1) setTableauIdx(tableauIdx + 1); }}
         height={height}
-        disabled={tableauIdx === props.tableaus.length - 1}
+        disabled={tableauIdx === props.nonOptimalTableaus.length - 1}
       />
     </Flex>
   );
 };
 
 export default TableauDisplay;
+
+function findPivotRowAndColumn(currentBasisIndices: number[], nextBasisIndices: number[]): [number, number] {
+  const currentSet = new Set(currentBasisIndices);
+  const nextSet = new Set(nextBasisIndices);
+
+  const diffCurrent = currentBasisIndices.map((x, i) => nextSet.has(x) ? -1 : i).filter(x => x !== -1);
+  const diffNext = nextBasisIndices.filter(x => !currentSet.has(x));
+
+  console.log(currentBasisIndices, nextBasisIndices);
+  console.log(diffCurrent, diffNext);
+  return [diffCurrent[0], diffNext[0]];
+}

@@ -26,14 +26,15 @@ export default function BigMPage() {
         setSimplexData={setSimplexData}
       />
       <Box mb={2} />
-      {simplexData && simplexData.Tableaus &&
+      {simplexData && simplexData.NonOptimalTableaus &&
         <>
           <TableauDisplay
             initialVariables={initialVariables}
             objectiveCoefficients={objectCoefficients}
             numSlack={simplexData.NumSlack}
             numArtificial={simplexData.NumArtificial}
-            tableaus={simplexData.Tableaus}
+            nonOptimalTableaus={simplexData.NonOptimalTableaus}
+            optimalTableaus={simplexData.OptimalTableaus}
             isBigM={true}
           />
 
@@ -46,7 +47,7 @@ export default function BigMPage() {
             optimalSolutions={removeDuplicateSolutions(simplexData.OptimalSolutions)}
             optimalCost={simplexData.OptimalCost}
             degenerateVariablesIdx={simplexData.DegenerateVariablesIdx}
-            lastTableauReducedCosts={simplexData.Tableaus[simplexData.Tableaus.length - 1].ReducedCosts}
+            finalReducedCosts={simplexData.OptimalTableaus[0].ReducedCosts!!}
             repeatedTableauIdx={simplexData.RepeatedTableauIdx}
           />
         </>

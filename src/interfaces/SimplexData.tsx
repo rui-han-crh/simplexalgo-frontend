@@ -7,6 +7,7 @@ export type SimplexData = {
   NumSlack: number;
   NumArtificial: number;
   BasicSolution: string[];
+  AlternativeOptimaTableaus: Tableau[];
 }
 
 export type TwoPhaseSimplexData = SimplexData & {
@@ -17,7 +18,8 @@ export type TwoPhaseSimplexData = SimplexData & {
 }
 
 export type BigMSimplexData = SimplexData & {
-  Tableaus: Tableau[];
+  NonOptimalTableaus: Tableau[];
+  OptimalTableaus: Tableau[];
   RepeatedTableauIdx: number;
   IsFeasible: boolean;
 }

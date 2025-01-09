@@ -14,7 +14,7 @@ export type ConclusionProps = {
   optimalSolutions?: { [key: number]: string }[];
   optimalCost?: string | null;
   degenerateVariablesIdx?: number[];
-  lastTableauReducedCosts?: string[];
+  finalReducedCosts?: string[];
   repeatedTableauIdx?: number;
 }
 
@@ -29,7 +29,7 @@ export const Conclusion = ({
   optimalSolutions = [],
   optimalCost = null,
   degenerateVariablesIdx = [],
-  lastTableauReducedCosts = [],
+  finalReducedCosts = [],
   repeatedTableauIdx = -1
 }: ConclusionProps) => {
   if (repeatedTableauIdx !== -1) {
@@ -60,7 +60,7 @@ export const Conclusion = ({
           optimalSolutions: optimalSolutions,
           degenerateVariablesIdx: degenerateVariablesIdx,
           optimalCost: optimalCost,
-          lastTableauReducedCosts: lastTableauReducedCosts,
+          lastTableauReducedCosts: finalReducedCosts,
         })
       }
     </Stack>
