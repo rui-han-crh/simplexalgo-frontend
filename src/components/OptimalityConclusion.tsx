@@ -32,7 +32,7 @@ function makeOptimalityLatex(initialVariables: string[], optimalSolutions: { [ke
     const optimalSolutionsVector = 
       optimalSolutions.length > 1 
       ? `$\\text{conv}\\bigg\\{${optimalSolutions.map(m => formatSolutionVector(m, initialVariables.length)).join(", ")}\\bigg\\}$`
-      : `${formatSolutionVector(optimalSolutions[0], initialVariables.length)}`
+      : `$${formatSolutionVector(optimalSolutions[0], initialVariables.length)}$`
 
     return (
       <Latex>

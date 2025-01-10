@@ -12,6 +12,17 @@ import {
   MenuRoot,
   MenuTrigger,
 } from "@/components/ui/menu"
+import { create, all } from 'mathjs'
+
+// configure the default type of numbers as Fractions
+const config = {
+  // Default type of number
+  // Available options: 'number' (default), 'BigNumber', or 'Fraction'
+  number: 'Fraction' as 'Fraction'
+}
+
+// create a mathjs instance with everything included
+const math = create(all, config)
 
 type Swap = {
   enteringVariable: string
@@ -93,7 +104,6 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
   const flexRef = useRef<HTMLDivElement>(null);
 
   const tableauList = useRef<Tableau[]>([...props.nonOptimalTableaus, props.optimalTableaus[0]]);
-  const lastBasisIndices = useRef<number[]>(props.optimalTableaus[0].BasicVariablesIdx);
 
   useEffect(() => {
     if (flexRef.current) {
@@ -170,7 +180,7 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
             matrix={tableauCurrent.Matrix}
             pivotRow={pivotRow}
             pivotColumn={pivotColumn}
-            ratios={tableauCurrent.Ratios ?? []}
+            ratios={tableauCurrent.Ratios ?? (pivotColumn !== undefined ? computeRatios(tableauCurrent.Matrix, pivotColumn) : [])}
             hideBasicZeros={true}
             isOverflown={isOverflown}
           />
@@ -221,7 +231,18 @@ function findPivotRowAndColumn(currentBasisIndices: number[], nextBasisIndices: 
   const diffCurrent = currentBasisIndices.map((x, i) => nextSet.has(x) ? -1 : i).filter(x => x !== -1);
   const diffNext = nextBasisIndices.filter(x => !currentSet.has(x));
 
-  console.log(currentBasisIndices, nextBasisIndices);
-  console.log(diffCurrent, diffNext);
   return [diffCurrent[0], diffNext[0]];
+}
+
+function computeRatios(matrix: string[][], pivotColumn: number): (string | null)[] {
+  return matrix.map(row => {
+    const num = math.fraction(row[row.length - 1]);
+    const den = math.fraction(row[pivotColumn]);
+
+    if (den.compare(0) <= 0 && num.compare(0) !== 0) {
+      return null;
+    }
+
+    return num.div(den).toString();
+  });
 }

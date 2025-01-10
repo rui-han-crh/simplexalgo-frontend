@@ -15,7 +15,7 @@ export type SimplexTableauProps = {
   matrix: string[][]
   pivotRow: number
   pivotColumn: number
-  ratios: string[]
+  ratios: (string | null)[]
   hideBasicZeros?: boolean
   isOverflown?: boolean
 }
