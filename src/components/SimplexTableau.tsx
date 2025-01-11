@@ -1,9 +1,11 @@
 import { Table, For, Flex } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
 import { useColorModeValue } from "@/components/ui/color-mode";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { useEffect, useRef, useState } from "react";
 import { formatFraction, formatVariable } from "@/util/format";
+import { TbArrowsCross } from "react-icons/tb";
 
 export type SimplexTableauProps = {
   variables: string[]
@@ -61,7 +63,6 @@ export default function SimplexTableau({ variables, basisIdx, cost, mCost, reduc
 
   const pivotHighlightColor = useColorModeValue("green.200", "green.800")
   const unboundedHighlightColor = useColorModeValue("red.300", "red.700")
-
   const lastColumnRef = useRef<HTMLTableCellElement>(null)
   const [lastColumnWidth, setLastColumnWidth] = useState(0)
 
@@ -74,7 +75,7 @@ export default function SimplexTableau({ variables, basisIdx, cost, mCost, reduc
   const allRatiosNull = ratios.every(r => r === null)
 
   return (
-    <Flex direction="column" paddingLeft={isOverflown ? 0 : lastColumnWidth} py={10}>
+    <Flex direction="column" paddingLeft={isOverflown ? 0 : lastColumnWidth}>
       <Table.Root size="sm" showColumnBorder>
         <Table.Header>
           <Table.Row bg="transparent">
@@ -140,7 +141,7 @@ export default function SimplexTableau({ variables, basisIdx, cost, mCost, reduc
                 </Latex>
               </Table.Cell>
           </Table.Row>
-
+          
           <For each={matrix}>
             {(row, i) => (
               <Table.Row key={i} bg="transparent">
@@ -151,23 +152,35 @@ export default function SimplexTableau({ variables, basisIdx, cost, mCost, reduc
                 </Table.Cell>
                 <For each={row}>
                   {(cell, j) => (
-                    <Table.Cell key={j} borderColor={borderColor} bg={pivotRow === i && pivotColumn === j ? pivotHighlightColor : undefined}>
-                      {hideBasicZeros && basisIdx.includes(j) && cell === "0" ? "" : <Latex>${formatFraction(cell)}$</Latex>}
+                    <Table.Cell 
+                      {...borderProps}
+                      style={{ whiteSpace: 'nowrap'}}
+                      key={j}
+                      bg={pivotRow === i && pivotColumn === j ? pivotHighlightColor : undefined}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                        <Latex>
+                          {hideBasicZeros && basisIdx.includes(j) && cell === "0" ? "" : `$${formatFraction(cell)}$`}
+                        </Latex>
+                        { j === variables.length && cell === "0" &&
+                          <Tooltip
+                            contentProps={{ textWrap: 'wrap' }}
+                            content="This variable is degenerate. It can be replaced by any nonbasic variable without changing the optimal cost." 
+                            openDelay={500}
+                          >
+                            <TbArrowsCross style={{ marginLeft: '1em' }} color="orange" />
+                          </Tooltip>
+                        }
+                      </span>
                     </Table.Cell>
                   )}
                 </For>
                 <Table.Cell borderColor="transparent" bg={pivotRow === i ? pivotHighlightColor : undefined}>
                   <Latex>
                     {
-                      allRatiosNull
-                      ? pivotRow === i
-                        ? `$(${formatVariable(variables[pivotColumn])} \\text{ entering})$`
-                        : ""
-                      : ratios[i] === null 
+                      allRatiosNull || ratios[i] === null 
                         ? ""
-                        : pivotRow === i
-                          ? `$${formatFraction(ratios[i])}\\quad (${ratios[i] === "0" ? `\\textcolor{red}{\\text{Degenerate }}` : ""} ${formatVariable(variables[pivotColumn])} \\text{ entering})$`
-                          : `$${formatFraction(ratios[i])}$`
+                        : `$${formatFraction(ratios[i])}${pivotRow === i ? `\\quad (${formatVariable(variables[pivotColumn])} \\text{ entering})` : ""}$`
                     }
                   </Latex>
                 </Table.Cell>

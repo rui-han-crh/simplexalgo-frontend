@@ -6,13 +6,11 @@ import { useColorModeValue } from "@/components//ui/color-mode";
 import { PaginationRoot, PaginationItems } from '@/components/ui/pagination';
 import { Tableau } from "@/interfaces/Tableau";
 import { MdOutlineNextPlan } from "react-icons/md";
-import {
-  MenuContent,
-  MenuItem,
-  MenuRoot,
-  MenuTrigger,
-} from "@/components/ui/menu"
-import { create, all } from 'mathjs'
+import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "@/components/ui/menu";
+import { create, all } from 'mathjs';
+import { Badge } from "@chakra-ui/react";
+import { HiOutlineBackspace } from "react-icons/hi2";
+import { Tooltip } from "./ui/tooltip";
 
 // configure the default type of numbers as Fractions
 const config = {
@@ -22,11 +20,16 @@ const config = {
 }
 
 // create a mathjs instance with everything included
-const math = create(all, config)
+const math = create(all, config);
 
 type Swap = {
   enteringVariable: string
   leavingVariable: string
+  solutionIdx: number
+}
+
+type TableauWithSolutionIdx = {
+  tableau: Tableau
   solutionIdx: number
 }
 
@@ -37,6 +40,7 @@ type TableauDisplayProps = {
   numArtificial: number
   nonOptimalTableaus: Tableau[],
   optimalTableaus: Tableau[],
+  adjacencyLists: number[][],
   isPhaseOne?: boolean
   isBigM?: boolean
 };
@@ -51,14 +55,18 @@ function indexToVar(index : number, numInitialVariables: number): string {
   return index < numInitialVariables ? `x${index + 1}` : `s${index - numInitialVariables + 1}`;
 }
 
-function findBasisDifference (currentTableau: Tableau, alternativeOptimaTableaus: Tableau[], numInitialVariables: number): Swap[] {
+function findBasisDifference(currentTableau: Tableau, alternativeOptimaTableaus: TableauWithSolutionIdx[] | null, numInitialVariables: number): Swap[] {
+  if (alternativeOptimaTableaus === null) {
+    return [];
+  }
+
   const currentBasisIndices = currentTableau.BasicVariablesIdx;
-  const otherBasisIndices = alternativeOptimaTableaus.map(t => t.BasicVariablesIdx);
 
   const setCurrent = new Set(currentBasisIndices);
   const result : Swap[] = [];
-  for (let i = 0; i < otherBasisIndices.length; i++) {
-    const basisIndices = otherBasisIndices[i];
+
+  for (const alternative of alternativeOptimaTableaus) {
+    const basisIndices = alternative.tableau.BasicVariablesIdx;
     const setOther = new Set(basisIndices);
     const diffCurrent = currentBasisIndices.filter(x => !setOther.has(x));
     const diffOther = basisIndices.filter(x => !setCurrent.has(x));
@@ -69,7 +77,7 @@ function findBasisDifference (currentTableau: Tableau, alternativeOptimaTableaus
       result.push({
         enteringVariable: indexToVar(diff[1], numInitialVariables),
         leavingVariable: indexToVar(diff[0], numInitialVariables),
-        solutionIdx: i
+        solutionIdx: alternative.solutionIdx
       });
     }
   }
@@ -101,15 +109,21 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
   const [height, setHeight] = useState<number>(0);
   const [isOverflown, setIsOverflown] = useState<boolean>(false);
   const boxRef = useRef<HTMLDivElement>(null);
-  const flexRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const tableauList = useRef<Tableau[]>([...props.nonOptimalTableaus, props.optimalTableaus[0]]);
+  const [tableauList, setTableauList] = useState<TableauWithSolutionIdx[]>(
+    [
+      ...props.nonOptimalTableaus.map(t => ({ tableau: t, solutionIdx: -1 })),
+      { tableau: props.optimalTableaus[0], solutionIdx: 0 }
+    ]
+  );
 
+  // Sets the height for the left and right nav buttons
   useEffect(() => {
-    if (flexRef.current) {
-      setHeight(flexRef.current.offsetHeight);
+    if (contentRef.current) {
+      setHeight(contentRef.current.offsetHeight);
     }
-  }, [flexRef.current]);
+  }, [contentRef.current]);
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -125,23 +139,27 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
   }, [boxRef.current]);
 
   const [tableauIdx, setTableauIdx] = useState<number>(0);
-  const tableauPrev = tableauList.current[Math.max(0, Math.min(tableauIdx - 1, tableauList.current.length - 1))];
-  const tableauCurrent = tableauList.current[Math.max(0, Math.min(tableauIdx, tableauList.current.length - 1))];
-  const tableauNext = tableauList.current[Math.max(0, Math.min(tableauIdx + 1, tableauList.current.length - 1))];
+  const tableauPrev = tableauList[Math.max(0, Math.min(tableauIdx - 1, tableauList.length - 1))];
+  const tableauCurrent = tableauList[Math.max(0, Math.min(tableauIdx, tableauList.length - 1))];
+  const tableauNext = tableauList[Math.max(0, Math.min(tableauIdx + 1, tableauList.length - 1))];
 
-  const rearrangement = findRearrangement(tableauPrev.BasicVariablesIdx, tableauCurrent.BasicVariablesIdx)
+  const rearrangement = findRearrangement(tableauPrev.tableau.BasicVariablesIdx, tableauCurrent.tableau.BasicVariablesIdx)
 
-  tableauCurrent.Matrix = rearrangement.map(i => tableauCurrent.Matrix[i])
-  tableauCurrent.BasicVariablesIdx = rearrangement.map(i => tableauCurrent.BasicVariablesIdx[i])
+  tableauCurrent.tableau.Matrix = rearrangement.map(i => tableauCurrent.tableau.Matrix[i])
+  tableauCurrent.tableau.BasicVariablesIdx = rearrangement.map(i => tableauCurrent.tableau.BasicVariablesIdx[i])
 
-  const [pivotRow, pivotColumn] = findPivotRowAndColumn(tableauCurrent.BasicVariablesIdx, tableauNext.BasicVariablesIdx);
+  const [pivotRow, pivotColumn] = findPivotRowAndColumn(tableauCurrent.tableau.BasicVariablesIdx, tableauNext.tableau.BasicVariablesIdx);
 
-  const numColumns = tableauCurrent.Matrix[0].length;
+  const numColumns = tableauCurrent.tableau.Matrix[0].length;
   const shadowColor = useColorModeValue("rgba(28, 28, 28, 0.2)", "rgba(200, 200, 200, 0.2)");
 
-  const tableauLast = tableauList.current[tableauList.current.length - 1];
+  const tableauLast = tableauList[tableauList.length - 1];
   const swaps = createListCollection({
-    items: findBasisDifference(tableauLast, props.optimalTableaus, props.initialVariables.length),
+    items: findBasisDifference(
+      tableauLast.tableau,
+      props.adjacencyLists[tableauLast.solutionIdx].map(i => ({ tableau: props.optimalTableaus[i], solutionIdx: i })),
+      props.initialVariables.length
+    )
   });
 
   return (
@@ -151,7 +169,6 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
       bg="bg.muted"
       rounded={10}
       boxShadow={`1px 1px 6px ${shadowColor}`}
-      ref={flexRef}
       maxWidth={"100%"}
     >
       <TableauNavButton
@@ -161,12 +178,19 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
         disabled={tableauIdx === 0}
       />
 
-      <Stack maxWidth={`calc(100% - ${120}px)`}>
+      <Stack maxWidth={`calc(100% - ${120}px)`} ref={contentRef} paddingY={2}>
+        <Flex boxOrient={"horizontal"} justifyContent={"center"} alignItems={"center"} minHeight={6}>
+          { tableauCurrent.solutionIdx !== -1 &&
+            <Badge variant="solid" colorPalette="green" size="md">
+              Optimal Solution {tableauCurrent.solutionIdx + 1}
+            </Badge> 
+          }
+        </Flex>
         <Box ref={boxRef} overflowX="scroll" justifyContent={"center"} maxWidth={"100%"}>
           <SimplexTableau
             key={tableauIdx}
             variables={generateVariables(props.initialVariables, props.numSlack, props.numArtificial)}
-            basisIdx={tableauCurrent.BasicVariablesIdx}
+            basisIdx={tableauCurrent.tableau.BasicVariablesIdx}
             cost={props.isPhaseOne 
               ? Array(numColumns - 1).fill("0")
               : [
@@ -175,40 +199,55 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
               ]
             }
             mCost={props.isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= props.initialVariables.length + props.numSlack ? "1" : "0") : []}
-            reducedCost= {tableauCurrent.ReducedCosts ?? props.optimalTableaus[0].ReducedCosts ?? []}
-            mReducedCost={tableauCurrent.MReducedCosts ?? props.optimalTableaus[0].MReducedCosts ?? []}
-            matrix={tableauCurrent.Matrix}
+            reducedCost= {tableauCurrent.tableau.ReducedCosts ?? props.optimalTableaus[0].ReducedCosts ?? []}
+            mReducedCost={tableauCurrent.tableau.MReducedCosts ?? props.optimalTableaus[0].MReducedCosts ?? []}
+            matrix={tableauCurrent.tableau.Matrix}
             pivotRow={pivotRow}
             pivotColumn={pivotColumn}
-            ratios={tableauCurrent.Ratios ?? (pivotColumn !== undefined ? computeRatios(tableauCurrent.Matrix, pivotColumn) : [])}
+            ratios={tableauCurrent.tableau.Ratios ?? (pivotColumn !== undefined ? computeRatios(tableauCurrent.tableau.Matrix, pivotColumn) : [])}
             hideBasicZeros={true}
             isOverflown={isOverflown}
           />
         </Box>
-        <Flex boxOrient={"horizontal"} justifyContent={"center"} alignItems={"center"} my={2}>
+        <Flex boxOrient={"horizontal"} justifyContent={"center"} alignItems={"center"}>
           <PaginationRoot
-            count={tableauList.current.length}
+            count={tableauList.length}
             pageSize={1}
             page={tableauIdx + 1}
             defaultPage={1}
             onPageChange={(page) => setTableauIdx(page.page - 1)}
+            size={"md"}
           >
             <PaginationItems/>
           </PaginationRoot>
-          <MenuRoot onSelect={(details) => { tableauList.current.push(props.optimalTableaus[parseInt(details.value)]); setTableauIdx(tableauIdx + 1); }}>
-            <MenuTrigger>
-                <Button variant="subtle" size="md" margin={0} padding={0}>
-                  <MdOutlineNextPlan />
-                </Button>
-            </MenuTrigger>
-            <MenuContent>
-              {swaps.items.map(swap => (
-                <MenuItem key={swap.solutionIdx} value={swap.solutionIdx.toString()}>
-                  {`${swap.leavingVariable} leaves, ${swap.enteringVariable} enters`}
-                </MenuItem>
-              ))}
-            </MenuContent>
-          </MenuRoot>
+          {tableauIdx === tableauList.length - 1 &&
+            <MenuRoot onSelect={(details) => { 
+                const idx = parseInt(details.value);
+                setTableauList([...tableauList, { tableau: props.optimalTableaus[idx], solutionIdx: idx }]);
+              }}>
+              <MenuTrigger>
+                  <Button variant="subtle" size="md" margin={0} padding={0}>
+                    <MdOutlineNextPlan/>
+                  </Button>
+              </MenuTrigger>
+              <MenuContent>
+                {swaps.items.map(swap => (
+                  <MenuItem key={swap.solutionIdx} value={swap.solutionIdx.toString()}>
+                    {`${swap.leavingVariable} leaves, ${swap.enteringVariable} enters (Solution ${swap.solutionIdx + 1})`}
+                  </MenuItem>
+                ))}
+              </MenuContent>
+            </MenuRoot>
+          }
+          { tableauIdx < tableauList.length - 1 && tableauCurrent.solutionIdx !== -1 &&
+            <Tooltip content="Remove all subsequent solutions" openDelay={200}>
+              <Button variant="subtle" size="md" margin={0} padding={0} onClick={() => 
+                { setTableauList([...tableauList.slice(0, tableauIdx + 1)]) }
+              }>
+                <HiOutlineBackspace color="red"/>
+              </Button>
+            </Tooltip>
+          }
         </Flex>
       </Stack>
 
@@ -239,7 +278,7 @@ function computeRatios(matrix: string[][], pivotColumn: number): (string | null)
     const num = math.fraction(row[row.length - 1]);
     const den = math.fraction(row[pivotColumn]);
 
-    if (den.compare(0) <= 0 && num.compare(0) !== 0) {
+    if (den.compare(0) <= 0) {
       return null;
     }
 

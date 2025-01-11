@@ -29,12 +29,14 @@ export default function BigMPage() {
       {simplexData && simplexData.NonOptimalTableaus &&
         <>
           <TableauDisplay
+            key={JSON.stringify(simplexData.NonOptimalTableaus)}
             initialVariables={initialVariables}
             objectiveCoefficients={objectCoefficients}
             numSlack={simplexData.NumSlack}
             numArtificial={simplexData.NumArtificial}
             nonOptimalTableaus={simplexData.NonOptimalTableaus}
             optimalTableaus={simplexData.OptimalTableaus}
+            adjacencyLists={simplexData.OptimaAdjacencyLists}
             isBigM={true}
           />
 
