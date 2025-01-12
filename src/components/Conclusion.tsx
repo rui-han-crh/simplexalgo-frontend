@@ -28,7 +28,6 @@ export const Conclusion = ({
   basicSolution = null,
   optimalSolutions = [],
   optimalCost = null,
-  degenerateVariablesIdx = [],
   finalReducedCosts = [],
   repeatedTableauIdx = -1
 }: ConclusionProps) => {
@@ -58,7 +57,6 @@ export const Conclusion = ({
           initialVariables: initialVariables,
           numSlack: numSlack,
           optimalSolutions: optimalSolutions,
-          degenerateVariablesIdx: degenerateVariablesIdx,
           optimalCost: optimalCost,
           lastTableauReducedCosts: finalReducedCosts,
         })

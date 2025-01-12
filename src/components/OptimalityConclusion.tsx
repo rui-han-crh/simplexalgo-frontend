@@ -6,23 +6,20 @@ type OptimalityConclusionProps = {
   initialVariables: string[]
   numSlack: number
   optimalSolutions: { [key: number]: string }[]
-  degenerateVariablesIdx: number[]
   optimalCost: string | null
   lastTableauReducedCosts: string[]
 }
 
-export const OptimalityConclusion = ({ initialVariables, numSlack, optimalSolutions, degenerateVariablesIdx, optimalCost, lastTableauReducedCosts }: OptimalityConclusionProps) => {
+export const OptimalityConclusion = ({ initialVariables, numSlack, optimalSolutions, optimalCost, lastTableauReducedCosts }: OptimalityConclusionProps) => {
   return (
     <Box fontSize={"lg"}>
       { makeOptimalityLatex(initialVariables, optimalSolutions, optimalCost, lastTableauReducedCosts, numSlack) }
-      <br />
-      { degenerateVariablesIdx.length > 0 && makeDegeneracyLatex(degenerateVariablesIdx, initialVariables) }
     </Box>
   )
 }
 
 function formatSolutionVector(solution: { [key: number]: string }, length: number): string {
-  return `\\begin{pmatrix}${Array.from({ length }, (_, i) => formatFraction(solution[i] || "0")).join("\\\\")}\\end{pmatrix}`;
+  return `\\begin{pmatrix}${Array.from({ length }, (_, i) => formatFraction(solution[i] || "0")).join("\\\\[0.3em]")}\\end{pmatrix}`;
 }
 
 function makeOptimalityLatex(initialVariables: string[], optimalSolutions: { [key: number]: string}[], optimalCost: string | null, finalReducedCosts: string[], numSlack: number) {
@@ -51,16 +48,4 @@ function makeOptimalityLatex(initialVariables: string[], optimalSolutions: { [ke
       </Latex>
     )
   }
-}
-
-function makeDegeneracyLatex(degenerateVariablesIdx: number[], initialVariables: string[]) {
-  const degenerateVariables = degenerateVariablesIdx.map(i => formatVariable(initialVariables[i])).join(", ")
-
-  return (
-    <Latex>
-      {`The solution is degenerate as basic variable${degenerateVariablesIdx.length > 1 ? 's' : ''} 
-      $${degenerateVariables}$ ${degenerateVariablesIdx.length > 1 ? 'are' : 'is'} 0. So the basis is not unique, 
-      as any nonbasic variable may replace a basic degenerate variable.`}
-    </Latex>
-  )
 }
