@@ -20,7 +20,7 @@ export const OptimalityConclusion = ({ initialVariables, numSlack, optimalSoluti
 
 function makeOptimalityLatex(initialVariables: string[], optimalSolutions: { [key: number]: string}[], optimalCost: string | null, finalReducedCosts: string[], numSlack: number) {
   if (optimalCost !== null) {
-    const initialVariablesVector = `$\\begin{pmatrix}${initialVariables.map(formatVariable).join("\\\\")}\\end{pmatrix}$`
+    const initialVariablesVector = `$\\begin{pmatrix}${initialVariables.map(formatVariable).join("\\\\[0.3em]")}\\end{pmatrix}$`
 
     const optimalSolutionsVector = 
       optimalSolutions.length > 1 

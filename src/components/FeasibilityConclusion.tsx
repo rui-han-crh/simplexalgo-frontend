@@ -14,7 +14,7 @@ export const FeasibilityConclusion = ({ isFeasible, initialVariables, numArtific
   const initialAndSlackVariablesTuple = `$\\begin{pmatrix}${[
     ...initialVariables,
     ...Array.from({ length: numSlack }, (_, i) => `s${i + 1}`)
-  ].map(formatVariable).join("\\\\")}\\end{pmatrix}$`;
+  ].map(formatVariable).join("\\\\[0.3em]")}\\end{pmatrix}$`;
 
   const numInitial = initialVariables.length;
   const bfsInitialAndSlack = `$\\begin{pmatrix}${basicSolution?.slice(0, numInitial + numSlack).map(formatFraction).join("\\\\[0.3em]")}\\end{pmatrix}$`;
