@@ -253,9 +253,9 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
 
       <TableauNavButton
         direction="right"
-        onClick={() => { if (tableauIdx < props.nonOptimalTableaus.length - 1) setTableauIdx(tableauIdx + 1); }}
+        onClick={() => { if (tableauIdx < tableauList.length - 1) setTableauIdx(tableauIdx + 1); }}
         height={height}
-        disabled={tableauIdx === props.nonOptimalTableaus.length - 1}
+        disabled={tableauIdx === tableauList.length - 1}
       />
     </Flex>
   );
