@@ -188,7 +188,7 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
         </Flex>
         <Box ref={boxRef} overflowX="scroll" justifyContent={"center"} maxWidth={"100%"}>
           <SimplexTableau
-            key={tableauIdx}
+            key={`${tableauList.length},${tableauIdx}`}
             variables={generateVariables(props.initialVariables, props.numSlack, props.numArtificial)}
             basisIdx={tableauCurrent.tableau.BasicVariablesIdx}
             cost={props.isPhaseOne 
@@ -242,7 +242,7 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
           { tableauIdx < tableauList.length - 1 && tableauCurrent.solutionIdx !== -1 &&
             <Tooltip content="Remove all subsequent solutions" openDelay={200}>
               <Button variant="subtle" size="md" margin={0} padding={0} onClick={() => 
-                { setTableauList([...tableauList.slice(0, tableauIdx + 1)]) }
+                { setTableauList([...tableauList.slice(0, tableauIdx + 1)]); }
               }>
                 <HiOutlineBackspace color="red"/>
               </Button>
