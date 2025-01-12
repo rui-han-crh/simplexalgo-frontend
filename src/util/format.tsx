@@ -18,3 +18,7 @@ export function formatVariable(v: string | undefined): string {
   
   return v.split(/(\d+)/).map((s, i) => i % 2 === 0 ? s : `_${s}`).join('')
 }
+
+export function formatSolutionVector(solution: { [key: number]: string }, length: number): string {
+  return `\\begin{pmatrix}${Array.from({ length }, (_, i) => formatFraction(solution[i] || "0")).join("\\\\[0.3em]")}\\end{pmatrix}`;
+}

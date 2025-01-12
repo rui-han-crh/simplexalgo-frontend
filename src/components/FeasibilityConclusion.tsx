@@ -11,12 +11,13 @@ type FeasibilityConclusionProps = {
 }
 
 export const FeasibilityConclusion = ({ isFeasible, initialVariables, numArtificial, numSlack, basicSolution }: FeasibilityConclusionProps) => {
-  const initialAndSlackVariablesTuple = [
+  const initialAndSlackVariablesTuple = `$\\begin{pmatrix}${[
     ...initialVariables,
     ...Array.from({ length: numSlack }, (_, i) => `s${i + 1}`)
-  ].map(formatVariable).join(", ");
+  ].map(formatVariable).join("\\\\")}\\end{pmatrix}$`;
+
   const numInitial = initialVariables.length;
-  const bfsInitialAndSlack = basicSolution?.slice(0, numInitial + numSlack).map(formatFraction).join(", ");
+  const bfsInitialAndSlack = `$\\begin{pmatrix}${basicSolution?.slice(0, numInitial + numSlack).map(formatFraction).join("\\\\[0.3em]")}\\end{pmatrix}$`;
 
   if (isFeasible) {
     const artificialVariablesSymbols = Array.from({ length: numArtificial }, (_, i) => `y_${i + 1}`);
@@ -30,7 +31,7 @@ export const FeasibilityConclusion = ({ isFeasible, initialVariables, numArtific
             }
           </Latex>
           <br/>
-          <Latex>{`So the linear problem has a BFS $(${initialAndSlackVariablesTuple}) = (${bfsInitialAndSlack})$.`}</Latex>
+          <Latex>{`So the linear problem has a BFS ${initialAndSlackVariablesTuple} = ${bfsInitialAndSlack}.`}</Latex>
       </Box>
     )
   } else {

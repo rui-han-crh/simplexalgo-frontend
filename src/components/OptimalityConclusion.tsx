@@ -1,5 +1,5 @@
 import Latex from "react-latex-next"
-import { formatFraction, formatVariable } from "@/util/format"
+import { formatFraction, formatSolutionVector, formatVariable } from "@/util/format"
 import { Box } from "@chakra-ui/react"
 
 type OptimalityConclusionProps = {
@@ -18,10 +18,6 @@ export const OptimalityConclusion = ({ initialVariables, numSlack, optimalSoluti
   )
 }
 
-function formatSolutionVector(solution: { [key: number]: string }, length: number): string {
-  return `\\begin{pmatrix}${Array.from({ length }, (_, i) => formatFraction(solution[i] || "0")).join("\\\\[0.3em]")}\\end{pmatrix}`;
-}
-
 function makeOptimalityLatex(initialVariables: string[], optimalSolutions: { [key: number]: string}[], optimalCost: string | null, finalReducedCosts: string[], numSlack: number) {
   if (optimalCost !== null) {
     const initialVariablesVector = `$\\begin{pmatrix}${initialVariables.map(formatVariable).join("\\\\")}\\end{pmatrix}$`
@@ -33,7 +29,7 @@ function makeOptimalityLatex(initialVariables: string[], optimalSolutions: { [ke
 
     return (
       <Latex>
-        {`Thus, the optimal solution is ${initialVariablesVector} = ${optimalSolutionsVector}, with cost ${formatFraction(optimalCost)}.`}
+        {`Thus, the optimal solution is ${initialVariablesVector} = ${optimalSolutionsVector}, with cost $${formatFraction(optimalCost)}$.`}
       </Latex>
     )
   } else {

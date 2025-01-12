@@ -4,6 +4,7 @@ import { Box, Text } from '@chakra-ui/react';
 import { TableauDisplay } from '@/components/TableauDisplay';
 import { TwoPhaseSimplexData } from '@/interfaces/SimplexData';
 import { Conclusion } from '@/components/Conclusion';
+import { removeDuplicateSolutions } from '@/util/removeDuplicate';
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -64,6 +65,8 @@ export default function TwoPhasePage() {
                   numSlack={simplexData.NumSlack}
                   numArtificial={0}
                   nonOptimalTableaus={simplexData.PhaseTwoTableaus}
+                  optimalTableaus={simplexData.OptimalTableaus}
+                  adjacencyLists={simplexData.OptimaAdjacencyLists}
                 />
 
                 <Conclusion
@@ -72,7 +75,7 @@ export default function TwoPhasePage() {
                   initialVariables={initialVariables}
                   numSlack={simplexData.NumSlack}
                   numArtificial={0}
-                  optimalSolutions={simplexData.OptimalSolutions}
+                  optimalSolutions={simplexData.OptimalSolutions && removeDuplicateSolutions(simplexData.OptimalSolutions)}
                   optimalCost={simplexData.OptimalCost}
                   degenerateVariablesIdx={simplexData.DegenerateVariablesIdx}
                   finalReducedCosts={simplexData.PhaseTwoTableaus[simplexData.PhaseTwoTableaus.length - 1]?.ReducedCosts?.slice(0, initialVariables.length)}

@@ -39,8 +39,8 @@ type TableauDisplayProps = {
   numSlack: number
   numArtificial: number
   nonOptimalTableaus: Tableau[],
-  optimalTableaus: Tableau[],
-  adjacencyLists: number[][],
+  optimalTableaus?: Tableau[],
+  adjacencyLists?: number[][],
   isPhaseOne?: boolean
   isBigM?: boolean
 };
@@ -105,18 +105,33 @@ function findRearrangement (prevBasisIndices: number[], currentBasisIndices: num
   return rearrangement;
 }
 
-export const TableauDisplay = (props: TableauDisplayProps) => {
+export const TableauDisplay = ({
+  initialVariables,
+  objectiveCoefficients,
+  numSlack,
+  numArtificial,
+  nonOptimalTableaus,
+  optimalTableaus = [],
+  adjacencyLists = [],
+  isPhaseOne,
+  isBigM
+}: TableauDisplayProps) => {
+
+
   const [height, setHeight] = useState<number>(0);
   const [isOverflown, setIsOverflown] = useState<boolean>(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const [tableauList, setTableauList] = useState<TableauWithSolutionIdx[]>(
-    [
-      ...props.nonOptimalTableaus.map(t => ({ tableau: t, solutionIdx: -1 })),
-      { tableau: props.optimalTableaus[0], solutionIdx: 0 }
-    ]
-  );
+  const [tableauList, setTableauList] = useState<TableauWithSolutionIdx[]>(() => {
+    const initialTableaus = nonOptimalTableaus.map(t => ({ tableau: t, solutionIdx: -1 }));
+
+    if (optimalTableaus && optimalTableaus.length > 0) {
+      initialTableaus.push({ tableau: optimalTableaus[0], solutionIdx: 0 });
+    }
+
+    return initialTableaus;
+  });
 
   // Sets the height for the left and right nav buttons
   useEffect(() => {
@@ -157,8 +172,8 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
   const swaps = createListCollection({
     items: findBasisDifference(
       tableauLast.tableau,
-      props.adjacencyLists[tableauLast.solutionIdx].map(i => ({ tableau: props.optimalTableaus[i], solutionIdx: i })),
-      props.initialVariables.length
+      adjacencyLists[tableauLast.solutionIdx]?.map(i => ({ tableau: optimalTableaus[i], solutionIdx: i })) ?? null,
+      initialVariables.length
     )
   });
 
@@ -189,18 +204,18 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
         <Box ref={boxRef} overflowX="scroll" justifyContent={"center"} maxWidth={"100%"}>
           <SimplexTableau
             key={`${tableauList.length},${tableauIdx}`}
-            variables={generateVariables(props.initialVariables, props.numSlack, props.numArtificial)}
+            variables={generateVariables(initialVariables, numSlack, numArtificial)}
             basisIdx={tableauCurrent.tableau.BasicVariablesIdx}
-            cost={props.isPhaseOne 
+            cost={isPhaseOne 
               ? Array(numColumns - 1).fill("0")
               : [
-                ...props.objectiveCoefficients,
-                ...Array.from({ length: numColumns - 1 - props.initialVariables.length }, () => "0")
+                ...objectiveCoefficients,
+                ...Array.from({ length: numColumns - 1 - initialVariables.length }, () => "0")
               ]
             }
-            mCost={props.isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= props.initialVariables.length + props.numSlack ? "1" : "0") : []}
-            reducedCost= {tableauCurrent.tableau.ReducedCosts ?? props.optimalTableaus[0].ReducedCosts ?? []}
-            mReducedCost={tableauCurrent.tableau.MReducedCosts ?? props.optimalTableaus[0].MReducedCosts ?? []}
+            mCost={isBigM ? Array.from({ length: numColumns - 1 }, (_, i) => i >= initialVariables.length + numSlack ? "1" : "0") : []}
+            reducedCost= {tableauCurrent.tableau.ReducedCosts ?? optimalTableaus[0]?.ReducedCosts ?? []}
+            mReducedCost={tableauCurrent.tableau.MReducedCosts ?? optimalTableaus[0]?.MReducedCosts ?? []}
             matrix={tableauCurrent.tableau.Matrix}
             pivotRow={pivotRow}
             pivotColumn={pivotColumn}
@@ -220,10 +235,10 @@ export const TableauDisplay = (props: TableauDisplayProps) => {
           >
             <PaginationItems/>
           </PaginationRoot>
-          {tableauIdx === tableauList.length - 1 &&
+          {tableauIdx === tableauList.length - 1 && optimalTableaus.length > 1 &&
             <MenuRoot onSelect={(details) => { 
                 const idx = parseInt(details.value);
-                setTableauList([...tableauList, { tableau: props.optimalTableaus[idx], solutionIdx: idx }]);
+                setTableauList([...tableauList, { tableau: optimalTableaus[idx], solutionIdx: idx }]);
               }}>
               <MenuTrigger>
                   <Button variant="subtle" size="md" margin={0} padding={0}>
